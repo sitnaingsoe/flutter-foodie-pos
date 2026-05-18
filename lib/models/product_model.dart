@@ -1,7 +1,7 @@
 class Product {
   final int? id;
   final String title;
-  final String? description;
+  final String description;
   final String? category;
   final double? price;
   final double? discountPercentage;
@@ -25,7 +25,7 @@ class Product {
   Product({
     this.id,
     required this.title,
-    this.description,
+    required this.description,
     this.category,
     this.price,
     this.discountPercentage,
@@ -54,13 +54,10 @@ class Product {
       description: json['description'],
       category: json['category'],
       price: (json['price'] as num?)?.toDouble(),
-      discountPercentage:
-          (json['discountPercentage'] as num?)?.toDouble(),
+      discountPercentage: (json['discountPercentage'] as num?)?.toDouble(),
       rating: (json['rating'] as num?)?.toDouble(),
       stock: json['stock'],
-      tags: json['tags'] != null
-          ? List<String>.from(json['tags'])
-          : [],
+      tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
       brand: json['brand'],
       sku: json['sku'],
       weight: json['weight'],
@@ -71,19 +68,12 @@ class Product {
       shippingInformation: json['shippingInformation'],
       availabilityStatus: json['availabilityStatus'],
       reviews: json['reviews'] != null
-          ? (json['reviews'] as List)
-              .map((e) => Review.fromJson(e))
-              .toList()
+          ? (json['reviews'] as List).map((e) => Review.fromJson(e)).toList()
           : [],
       returnPolicy: json['returnPolicy'],
-      minimumOrderQuantity:
-          json['minimumOrderQuantity'],
-      meta: json['meta'] != null
-          ? Meta.fromJson(json['meta'])
-          : null,
-      images: json['images'] != null
-          ? List<String>.from(json['images'])
-          : [],
+      minimumOrderQuantity: json['minimumOrderQuantity'],
+      meta: json['meta'] != null ? Meta.fromJson(json['meta']) : null,
+      images: json['images'] != null ? List<String>.from(json['images']) : [],
       thumbnail: json['thumbnail'],
     );
   }
@@ -106,11 +96,9 @@ class Product {
       "warrantyInformation": warrantyInformation,
       "shippingInformation": shippingInformation,
       "availabilityStatus": availabilityStatus,
-      "reviews":
-          reviews?.map((e) => e.toJson()).toList(),
+      "reviews": reviews?.map((e) => e.toJson()).toList(),
       "returnPolicy": returnPolicy,
-      "minimumOrderQuantity":
-          minimumOrderQuantity,
+      "minimumOrderQuantity": minimumOrderQuantity,
       "meta": meta?.toJson(),
       "images": images,
       "thumbnail": thumbnail,
@@ -123,14 +111,9 @@ class Dimensions {
   final double? height;
   final double? depth;
 
-  Dimensions({
-    this.width,
-    this.height,
-    this.depth,
-  });
+  Dimensions({this.width, this.height, this.depth});
 
-  factory Dimensions.fromJson(
-      Map<String, dynamic> json) {
+  factory Dimensions.fromJson(Map<String, dynamic> json) {
     return Dimensions(
       width: (json['width'] as num?)?.toDouble(),
       height: (json['height'] as num?)?.toDouble(),
@@ -139,11 +122,7 @@ class Dimensions {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      "width": width,
-      "height": height,
-      "depth": depth,
-    };
+    return {"width": width, "height": height, "depth": depth};
   }
 }
 
@@ -162,8 +141,7 @@ class Review {
     this.reviewerEmail,
   });
 
-  factory Review.fromJson(
-      Map<String, dynamic> json) {
+  factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
       rating: json['rating'],
       comment: json['comment'],
@@ -190,15 +168,9 @@ class Meta {
   final String? barcode;
   final String? qrCode;
 
-  Meta({
-    this.createdAt,
-    this.updatedAt,
-    this.barcode,
-    this.qrCode,
-  });
+  Meta({this.createdAt, this.updatedAt, this.barcode, this.qrCode});
 
-  factory Meta.fromJson(
-      Map<String, dynamic> json) {
+  factory Meta.fromJson(Map<String, dynamic> json) {
     return Meta(
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
