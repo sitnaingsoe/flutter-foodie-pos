@@ -1,7 +1,4 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:test_1/models/product_model.dart';
 import 'package:test_1/screens/product_detail_screen.dart';
 import '../services/product_service.dart';

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_1/screens/login_screen.dart';
 
-
 void main() {
   runApp(const MyApp());
 }
@@ -40,9 +39,7 @@ class MyApp extends StatelessWidget {
           filled: true,
           fillColor: Colors.grey.shade900,
 
-          hintStyle: const TextStyle(
-            color: Colors.grey,
-          ),
+          hintStyle: const TextStyle(color: Colors.grey),
 
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
