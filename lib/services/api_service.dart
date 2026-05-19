@@ -1,31 +1,33 @@
-import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:test_1/models/user_model.dart';
+import '../api_response/api_response.dart';
 
 class AuthService {
-  static Future<UserModel?> login({
+  static String errorMessage = "";
+
+  static final Dio dio = Dio()
+    ..interceptors.add(PrettyDioLogger(requestBody: true, responseBody: true));
+  static Future<ApiResponse<UserModel>> login({
     required String username,
     required String password,
   }) async {
     try {
-      final url = Uri.parse('https://dummyjson.com/auth/login');
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"username": username, "password": password}),
+      final response = await dio.post(
+        'https://dummyjson.com/auth/login',
+        data: {"username": username, "password": password},
       );
-      if (response.statusCode == 200) {
-        debugPrint(response.body);
-        final data = jsonDecode(response.body);
-        return UserModel.fromJson(data);
-      } else {
-        return null;
-      }
+
+      final user = UserModel.fromJson(response.data);
+
+      return ApiResponse.success(data: user, message: "Login Success");
+    } on DioException catch (e) {
+      return ApiResponse.failure(
+        message: "Login Failed",
+        error: e.response?.data['message'],
+      );
     } catch (e) {
-      debugPrint(e.toString());
-      return null;
+      return ApiResponse.failure(error: e.toString());
     }
   }
 }

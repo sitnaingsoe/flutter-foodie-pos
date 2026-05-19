@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:test_1/models/user_model.dart';
 import 'package:test_1/screens/main_screen.dart';
-import 'dart:convert';
 import '../services/api_service.dart';
-import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,16 +24,21 @@ class _LoginScreenState extends State<LoginScreen> {
       isLoading = true;
     });
 
-    final success = await AuthService.login(
+    final response = await AuthService.login(
       username: usernameController.text,
       password: passwordController.text,
     );
 
-    if (success != null) {
+    if (!mounted) return;
+
+    if (response.success && response.data != null) {
       Navigator.push(
-        // ignore: use_build_context_synchronously
         context,
-        MaterialPageRoute(builder: (_) => MainScreen(user: widget.user)),
+        MaterialPageRoute(builder: (_) => MainScreen(user: response.data!)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response.error ?? response.message)),
       );
     }
   }

@@ -6,17 +6,18 @@ class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, required this.user});
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text("Profile"),
-        backgroundColor: const Color.fromARGB(255, 90, 147, 247),
+        backgroundColor: const Color.fromARGB(255, 40, 41, 42),
         actions: [
           Stack(
             children: [
@@ -33,35 +34,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsetsGeometry.all(2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(5),
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   boxShadow: const [
                     BoxShadow(
-                      color: Color.fromARGB(31, 169, 145, 145),
-                      blurRadius: 5,
+                      color: Color.fromARGB(255, 35, 27, 27),
+                      blurRadius: 3,
                     ),
                   ],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey),
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
                         CircleAvatar(
-                          radius: 60,
-                          backgroundImage: NetworkImage(
-                            widget.user.image ?? '',
-                          ),
+                          radius: 30,
+                          backgroundImage:
+                              widget.user.image != null &&
+                                  widget.user.image!.isNotEmpty
+                              ? NetworkImage(widget.user.image!)
+                              : const AssetImage(
+                                      'assets/images/default-image.jpg',
+                                    )
+                                    as ImageProvider,
                         ),
-                        Text(
-                          widget.user.firstName ?? "sdfsdfdfdfgd",
-                          style: TextStyle(color: Colors.amber, fontSize: 20),
+                        const SizedBox(width: 20),
+                        Row(
+                          children: [
+                            Text(
+                              widget.user.firstName ?? "user name",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              widget.user.lastName ?? "user name",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

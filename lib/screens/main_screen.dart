@@ -22,11 +22,6 @@ class _MainScreenState extends State<MainScreen> {
 
     screens = [HomeScreen(), ProfileScreen(user: widget.user), CartScreen()];
   }
-  // = [
-  //   HomeScreen(),
-  //   ProfileScreen(user: widget.user,),
-  //   CartScreen(),
-  // ];
 
   @override
   Widget build(BuildContext context) {
