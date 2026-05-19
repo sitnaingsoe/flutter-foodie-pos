@@ -45,20 +45,30 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {});
     }
 
-    allProducts = await productService.getProducts();
+    final response = await productService.getProducts();
 
-    // screen closed
     if (!mounted) return;
 
-    // category list
-    categories = allProducts.map((e) => e.category ?? '').toSet().toList();
+    if (response.success) {
+      allProducts = response.data!;
 
-    categories.insert(0, 'all');
+      categories = allProducts.map((e) => e.category ?? '').toSet().toList();
 
-    setState(() {
-      filteredProducts = allProducts;
-      isLoading = false;
-    });
+      categories.insert(0, 'all');
+
+      setState(() {
+        filteredProducts = allProducts;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response.error ?? response.message)),
+      );
+    }
   }
 
   // SEARCH + CATEGORY FILTER

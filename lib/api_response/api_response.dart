@@ -28,16 +28,4 @@ class ApiResponse<T> {
       error: error,
     );
   }
-
-  @override
-  String toString() {
-    return '''
-ApiResponse(
-  success: $success,
-  message: $message,
-  error: $error,
-  data: $data
-)
-''';
-  }
 }
