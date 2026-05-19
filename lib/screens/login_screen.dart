@@ -32,10 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (response.data != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => MainScreen(user: response.data!)),
-      );
+      Navigator.push(context, MaterialPageRoute(builder: (_) => MainScreen()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(response.error ?? response.message)),

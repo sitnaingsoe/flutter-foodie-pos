@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_1/models/user_model.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -9,6 +12,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  UserModel? user;
+  @override
+  void initState() {
+    super.initState();
+
+    getUser();
+  }
+
+  Future<void> getUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = prefs.getString("user");
+    if (userData != null) {
+      setState(() {
+        user = UserModel.fromJson(jsonDecode(userData));
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,9 +79,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         CircleAvatar(
                           radius: 30,
                           backgroundImage:
-                              widget.user.image != null &&
-                                  widget.user.image!.isNotEmpty
-                              ? NetworkImage(widget.user.image!)
+                              user!.image != null && user!.image!.isNotEmpty
+                              ? NetworkImage(user!.image!)
                               : const AssetImage(
                                       'assets/images/default-image.jpg',
                                     )
@@ -70,7 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Row(
                           children: [
                             Text(
-                              widget.user.firstName ?? "user name",
+                              user!.firstName ?? "user name",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -78,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(width: 5),
                             Text(
-                              widget.user.lastName ?? "user name",
+                              user!.lastName ?? "user name",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,

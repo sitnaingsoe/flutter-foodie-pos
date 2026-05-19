@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:test_1/models/user_model.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'cart_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  final UserModel user;
-
-  const MainScreen({super.key, required this.user});
+  const MainScreen({super.key});
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
@@ -20,7 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
 
-    screens = [HomeScreen(), ProfileScreen(user: widget.user), CartScreen()];
+    screens = [HomeScreen(), ProfileScreen(), CartScreen()];
   }
 
   @override

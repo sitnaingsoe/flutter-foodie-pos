@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_1/models/user_model.dart';
-import 'package:test_1/screens/home_screen.dart';
 import 'package:test_1/screens/login_screen.dart';
 import 'package:test_1/screens/main_screen.dart';
 
@@ -9,6 +7,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
+
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
@@ -57,7 +56,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      home: isLoggedIn ? HomeScreen() : LoginScreen(),
+      home: isLoggedIn ? MainScreen() : LoginScreen(),
     );
   }
 }
