@@ -16,17 +16,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-
     getUser();
   }
 
   Future<void> getUser() async {
     final prefs = await SharedPreferences.getInstance();
-    final userData = prefs.getString("user");
-    if (userData != null) {
+    final userData = prefs.getString("user") ?? '';
+    if (userData.isNotEmpty) {
       setState(() {
         user = UserModel.fromJson(jsonDecode(userData));
       });
+    } else {
+      return;
     }
   }
 
@@ -78,6 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         CircleAvatar(
                           radius: 30,
+
                           backgroundImage:
                               user!.image != null && user!.image!.isNotEmpty
                               ? NetworkImage(user!.image!)

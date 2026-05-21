@@ -25,7 +25,6 @@ class AuthService {
         final data = response.data;
         final user = UserModel.fromJson(response.data);
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool("isLoggedIn", true);
         await prefs.setString("token", data['accessToken'] ?? '');
         await prefs.setString("user", jsonEncode(data));
         return ApiResponse.success(data: user, message: "Login Success");

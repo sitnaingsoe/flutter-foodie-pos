@@ -5,10 +5,18 @@ import 'package:test_1/screens/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final bool isLoggedIn;
 
   final prefs = await SharedPreferences.getInstance();
 
-  bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  String token = prefs.getString('token') ?? '';
+
+  if (token.isNotEmpty) {
+    isLoggedIn = true;
+  } else {
+    isLoggedIn = false;
+  }
+
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
@@ -56,7 +64,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      home: isLoggedIn ? MainScreen() : LoginScreen(),
+      home: isLoggedIn ? LoginScreen() : LoginScreen(),
     );
   }
 }
