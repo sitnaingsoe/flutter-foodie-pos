@@ -16,7 +16,6 @@ void main() async {
   } else {
     isLoggedIn = false;
   }
-
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
@@ -64,7 +63,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      home: isLoggedIn ? LoginScreen() : LoginScreen(),
+      home: isLoggedIn ? MainScreen() : LoginScreen(),
     );
   }
 }

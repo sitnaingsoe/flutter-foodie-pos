@@ -263,6 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           CrossAxisAlignment.start,
 
                                       children: [
+                                        const SizedBox(height: 5),
                                         Text(
                                           product.title,
 
@@ -272,12 +273,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 15,
+                                            color: Colors.black,
                                           ),
                                         ),
 
                                         const SizedBox(height: 5),
 
-                                        Text("⭐ ${product.rating}"),
+                                        Text(
+                                          "⭐ ${product.rating}",
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                          ),
+                                        ),
 
                                         const SizedBox(height: 5),
 
@@ -299,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: ElevatedButton(
                                             onPressed: () {},
 
-                                            child: const Text("Add to Cart"),
+                                            child: const Text("Order"),
                                           ),
                                         ),
                                       ],
