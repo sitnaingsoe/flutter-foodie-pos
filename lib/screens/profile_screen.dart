@@ -72,13 +72,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         boxShadow: const [
-                          BoxShadow(
-                            color: Color.fromARGB(255, 173, 171, 171),
-                            blurRadius: 3,
-                          ),
+                          BoxShadow(color: Colors.white, blurRadius: 3),
                         ],
 
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(5),
                         border: Border.all(color: Colors.grey),
                       ),
                       child: Column(
@@ -111,19 +108,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     const SizedBox(height: 8),
                     Container(
-                      height: 180,
+                      height: 210,
                       width: double.infinity,
-
                       padding: const EdgeInsets.only(top: 5, left: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(5),
                         border: Border.all(color: Colors.grey),
                         boxShadow: const [
-                          BoxShadow(
-                            color: Color.fromARGB(255, 173, 171, 171),
-                            blurRadius: 3,
-                          ),
+                          BoxShadow(color: Colors.white, blurRadius: 3),
                         ],
                       ),
                       child: Padding(
@@ -139,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 fontSize: 15,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 15),
                             Padding(
                               padding: const EdgeInsets.only(left: 15),
                               child: Column(
@@ -149,22 +142,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     "Email : ${user!.email} ",
                                     style: const TextStyle(color: Colors.black),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 15),
                                   Text(
                                     "First Name :  ${user!.firstName}",
                                     style: const TextStyle(color: Colors.black),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 15),
                                   Text(
                                     "Last Name :  ${user!.lastName}",
                                     style: const TextStyle(color: Colors.black),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 15),
                                   Text(
                                     "Gender :  ${user!.gender}",
                                     style: const TextStyle(color: Colors.black),
                                   ),
-                                  const SizedBox(height: 8),
                                 ],
                               ),
                             ),
@@ -198,6 +190,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 210,
+                      width: double.infinity,
+
+                      padding: const EdgeInsets.only(top: 5, left: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(color: Colors.white),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.white, blurRadius: 3),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Your Information ".toUpperCase(),
+                              style: const TextStyle(
+                                color: Color.fromARGB(255, 45, 44, 44),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 15),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Email : ${user!.email} ",
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  Text(
+                                    "First Name :  ${user!.firstName}",
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  Text(
+                                    "Last Name :  ${user!.lastName}",
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  Text(
+                                    "Gender :  ${user!.gender}",
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
                     const SizedBox(height: 8),
 
                     SizedBox(

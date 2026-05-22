@@ -13,8 +13,8 @@ class AppTheme {
     primaryColor: primaryColor,
 
     appBarTheme: const AppBarTheme(
-      backgroundColor: const Color(0xFF1C1C1C),
-      foregroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 43, 43, 43),
+      foregroundColor: Color.fromARGB(255, 255, 252, 252),
       elevation: 0,
       centerTitle: true,
     ),

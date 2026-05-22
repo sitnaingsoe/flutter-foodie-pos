@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_1/models/product_model.dart';
+import 'package:test_1/screens/cart_screen.dart';
 import 'package:test_1/screens/product_detail_screen.dart';
 
 import '../services/product_service.dart';
@@ -107,6 +108,17 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text("HOME"),
         automaticallyImplyLeading: false,
+
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.shopping_cart),
+              ),
+            ],
+          ),
+        ],
       ),
 
       body: Padding(
@@ -170,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               : Colors.grey.shade300,
                           width: 1,
                         ),
-
                       ),
 
                       child: Center(
@@ -310,10 +321,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                         SizedBox(
                                           width: double.infinity,
-
                                           child: ElevatedButton(
-                                            onPressed: () {},
-
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => CartScreen(),
+                                                ),
+                                              );
+                                            },
                                             child: const Text("Order"),
                                           ),
                                         ),

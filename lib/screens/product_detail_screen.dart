@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:test_1/screens/cart_screen.dart';
+import 'package:test_1/screens/main_screen.dart';
 import '../models/product_model.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -11,6 +13,8 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int quantity = 1;
+  double total = 0.0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,6 +161,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -165,6 +170,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 51, 51, 51),
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -173,6 +179,55 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
             ),
           ],
+        ),
+      ),
+      bottomSheet: Container(
+        margin: const EdgeInsets.all(5),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(30),
+              blurRadius: 10,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+            children: [
+              Text(
+                "Total: \$${widget.product.price! * quantity}",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+              // Add to cart button
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MainScreen(initialIndex: 2),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 15,
+                  ),
+                ),
+                child: const Text("Add to Cart"),
+              ),
+            ],
+          ),
         ),
       ),
     );

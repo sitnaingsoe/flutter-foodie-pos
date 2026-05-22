@@ -43,6 +43,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        surfaceTintColor: Colors.transparent,
+        title: Text("Welcome Back"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -66,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 labelText: 'Username',
                 prefixIcon: const Icon(Icons.person, color: Colors.blue),
                 filled: true,
-                fillColor: const Color.fromARGB(255, 0, 0, 0),
+                fillColor: const Color.fromARGB(255, 247, 245, 245),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -79,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 labelText: 'Password',
                 prefixIcon: const Icon(Icons.lock, color: Colors.blue),
                 filled: true,
-                fillColor: const Color.fromARGB(255, 1, 1, 1),
+                fillColor: const Color.fromARGB(255, 255, 255, 255),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),

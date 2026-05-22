@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:test_1/screens/product_detail_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'cart_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
+  const MainScreen({super.key, this.initialIndex = 0});
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int currentIndex = 0;
+  late int currentIndex;
   late List<Widget> screens;
 
   @override
   void initState() {
     super.initState();
-
+    currentIndex = widget.initialIndex;
     screens = [HomeScreen(), ProfileScreen(), CartScreen()];
   }
 
