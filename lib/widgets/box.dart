@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 
 Widget buildGridItem(IconData icon, String title, Color color) {
   return Container(
+    margin: const EdgeInsets.all(4),
+
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(10),
-      boxShadow: [BoxShadow(color: Colors.black.withAlpha(30), blurRadius: 10)],
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withAlpha(10),
+          blurRadius: 4,
+          offset: const Offset(0, 7),
+        ),
+      ],
     ),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,

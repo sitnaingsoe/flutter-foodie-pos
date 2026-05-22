@@ -159,10 +159,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       decoration: BoxDecoration(
                         color: selectedCategories == category
-                            ? Colors.blue
-                            : Colors.grey.shade200,
+                            ? const Color(0xFF1C1C1C) // selected (dark premium)
+                            : Colors.grey.shade100, // unselected (soft light)
 
                         borderRadius: BorderRadius.circular(20),
+
+                        border: Border.all(
+                          color: selectedCategories == category
+                              ? const Color(0xFF1C1C1C)
+                              : Colors.grey.shade300,
+                          width: 1,
+                        ),
+
                       ),
 
                       child: Center(

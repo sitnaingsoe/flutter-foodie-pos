@@ -15,12 +15,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(widget.product.title),
-        backgroundColor: Colors.blue,
-      ),
+      appBar: AppBar(title: Text(widget.product.title)),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(3),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -157,6 +154,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     const SizedBox(height: 15),
                     const Text(
                       "Description",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      widget.product.description,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
