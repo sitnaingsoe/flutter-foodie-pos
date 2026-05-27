@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_1/screens/cart_screen.dart';
-import 'package:test_1/screens/main_screen.dart';
+import 'package:test_1/screens/home_screen.dart';
 import '../models/product_model.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -13,13 +13,15 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int quantity = 1;
-  double total = 0.0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(title: Text(widget.product.title)),
+      appBar: AppBar(
+        title: Text(widget.product.title),
+        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.favorite))],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(3),
         child: Column(
@@ -186,7 +188,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-
           boxShadow: [
             BoxShadow(
               color: Colors.black.withAlpha(30),
@@ -198,10 +199,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         child: SafeArea(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
             children: [
               Text(
-                "Total: \$${widget.product.price! * quantity}",
+                "Total: \$${(widget.product.price! * quantity).toStringAsFixed(2)}",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -214,17 +214,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => MainScreen(initialIndex: 2),
+                      builder: (_) => HomeScreen(initialIndex: 2),
                     ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
+                    horizontal: 20,
                     vertical: 15,
                   ),
                 ),
-                child: const Text("Add to Cart"),
+                child: const Text("Buy Now"),
               ),
             ],
           ),

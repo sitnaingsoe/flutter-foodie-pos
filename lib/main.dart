@@ -1,36 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_1/Theme/app_theme.dart';
 import 'package:test_1/screens/login_screen.dart';
-import 'package:test_1/screens/main_screen.dart';
+import 'package:test_1/screens/home_screen.dart';
+import 'package:test_1/screens/splash_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final bool isLoggedIn;
-
-  final prefs = await SharedPreferences.getInstance();
-
-  String token = prefs.getString('token') ?? '';
-
-  if (token.isNotEmpty) {
-    isLoggedIn = true;
-  } else {
-    isLoggedIn = false;
-  }
-  runApp(MyApp(isLoggedIn: isLoggedIn));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn;
-
-  const MyApp({super.key, required this.isLoggedIn});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: isLoggedIn ? MainScreen() : LoginScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
+      },
     );
   }
 }

@@ -35,7 +35,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
+    await prefs.remove('accessToken');
+    await prefs.remove("refreshToken");
+    await prefs.remove("user");
+    await prefs.remove("expiryTime");
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
@@ -192,7 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      height: 210,
+                      height: 140,
                       width: double.infinity,
 
                       padding: const EdgeInsets.only(top: 5, left: 8),
@@ -201,7 +204,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(5),
                         border: Border.all(color: Colors.white),
                         boxShadow: const [
-                          BoxShadow(color: Colors.white, blurRadius: 3),
+                          BoxShadow(
+                            color: Color.fromARGB(255, 174, 176, 174),
+                            blurRadius: 3,
+                          ),
                         ],
                       ),
                       child: Padding(
@@ -210,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Your Information ".toUpperCase(),
+                              "General".toUpperCase(),
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 45, 44, 44),
                                 fontWeight: FontWeight.bold,
@@ -219,28 +225,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 15),
                             Padding(
-                              padding: const EdgeInsets.only(left: 15),
+                              padding: const EdgeInsets.only(top: 10),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Email : ${user!.email} ",
-                                    style: const TextStyle(color: Colors.black),
+                                  Row(
+                                    children: const [
+                                      Icon(
+                                        Icons.help,
+                                        color: Color.fromARGB(
+                                          255,
+                                          113,
+                                          112,
+                                          112,
+                                        ),
+                                      ),
+                                      SizedBox(width: 15),
+                                      Text(
+                                        "Help",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 15),
-                                  Text(
-                                    "First Name :  ${user!.firstName}",
-                                    style: const TextStyle(color: Colors.black),
-                                  ),
-                                  const SizedBox(height: 15),
-                                  Text(
-                                    "Last Name :  ${user!.lastName}",
-                                    style: const TextStyle(color: Colors.black),
-                                  ),
-                                  const SizedBox(height: 15),
-                                  Text(
-                                    "Gender :  ${user!.gender}",
-                                    style: const TextStyle(color: Colors.black),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.security,
+                                        color: Color.fromARGB(
+                                          255,
+                                          113,
+                                          112,
+                                          112,
+                                        ),
+                                      ),
+                                      SizedBox(width: 15),
+                                      Text(
+                                        "Privacy & Policy",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

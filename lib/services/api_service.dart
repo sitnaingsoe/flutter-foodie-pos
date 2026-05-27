@@ -18,15 +18,18 @@ class AuthService {
     try {
       final response = await dio.post(
         'https://dummyjson.com/auth/login',
-        data: {"username": username, "password": password},
+        data: {"username": username, "password": password, "expiresInMins": 30},
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
         final user = UserModel.fromJson(response.data);
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("token", data['accessToken'] ?? '');
+        await prefs.setString("accessToken", data['accessToken'] ?? '');
+        await prefs.setString("refreshToken", data['refreshToken']);
         await prefs.setString("user", jsonEncode(data));
+        final expiryTime = DateTime.now().add(const Duration(minutes: 5));
+        await prefs.setString("expiryTime", expiryTime.toIso8601String());
         return ApiResponse.success(data: user, message: "Login Success");
       } else {
         return ApiResponse.failure(message: "Login Failed");
