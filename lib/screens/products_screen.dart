@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:test_1/models/category_model.dart';
-import 'package:test_1/models/product_model.dart';
-import 'package:test_1/screens/product_detail_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:test_1/providers/cart_provider.dart';
+import 'package:test_1/providers/category_provider.dart';
+import 'package:test_1/providers/product_provider.dart';
 
 import '../services/product_service.dart';
 
@@ -13,20 +14,11 @@ class ProductsScreen extends StatefulWidget {
 }
 
 class _ProductsScreenState extends State<ProductsScreen> {
-
   final ProductService productService = ProductService();
 
   final ScrollController scrollController = ScrollController();
 
   final TextEditingController searchController = TextEditingController();
-
-  List<Product> allProducts = [];
-  List<Product> filteredProducts = [];
-  List<CategoryModel> categories = [];
-
-  List<Product> favoriteProducts = [];
-
-  List<Product> cartProducts = [];
 
   String selectedCategories = "all";
 
@@ -34,26 +26,23 @@ class _ProductsScreenState extends State<ProductsScreen> {
   int quantity = 1;
 
   int limit = 10;
-  int skip = 0;
-
-  bool isLoading = false;
-  bool isLoadingMore = false;
-  bool hasMore = true;
 
   String currentCategory = "all";
   int categorySkip = 0;
   bool isCategoryMode = false;
-
   @override
   void initState() {
     super.initState();
-    fetchCategories();
-    fetchProducts();
+
+    Future.microtask(() {
+      context.read<CategoryProvider>().fetchCategories();
+      context.read<ProductProvider>().fetchProducts();
+    });
 
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent - 200) {
-        loadMore();
+        context.read<ProductProvider>().fetchProducts();
       }
     });
   }
@@ -65,186 +54,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
     super.dispose();
   }
 
-  // =========================
-  // FETCH CATEGORIES
-  // =========================
-  Future<void> fetchCategories() async {
-    final data = await productService.getCategories();
-
-    categories = data;
-
-    categories.insert(0, CategoryModel(slug: "all", name: "All"));
-
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  // =========================
-  // FETCH PRODUCTS
-  // =========================
-  Future<void> fetchProducts() async {
-    isLoading = true;
-
-    if (mounted) {
-      setState(() {});
-    }
-
-    final response = await productService.getProducts(limit: limit, skip: skip);
-
-    if (!mounted) return;
-
-    if (response.success) {
-      final products = response.data!;
-
-      allProducts = products;
-      filteredProducts = products;
-
-      if (products.length < limit) {
-        hasMore = false;
-      } else {
-        hasMore = true;
-      }
-
-      isLoading = false;
-
-      setState(() {});
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response.error ?? response.message)),
-      );
-
-      isLoading = false;
-
-      setState(() {});
-    }
-  }
-
-  // =========================
-  // LOAD MORE
-  // =========================
-  Future<void> loadMore() async {
-    if (isLoadingMore || !hasMore) return;
-
-    isLoadingMore = true;
-
-    setState(() {});
-
-    try {
-      if (isCategoryMode) {
-        categorySkip += limit;
-
-        final response = await productService.getProductsByCategory(
-          category: currentCategory,
-          limit: limit,
-          skip: categorySkip,
-        );
-
-        if (response.success) {
-          final newProducts = response.data!;
-
-          if (newProducts.isEmpty) {
-            hasMore = false;
-          } else {
-            allProducts.addAll(newProducts);
-            filteredProducts.addAll(newProducts);
-          }
-        }
-      } else {
-        skip += limit;
-
-        final response = await productService.getProducts(
-          limit: limit,
-          skip: skip,
-        );
-
-        if (response.success) {
-          final newProducts = response.data!;
-
-          if (newProducts.isEmpty) {
-            hasMore = false;
-          } else {
-            allProducts.addAll(newProducts);
-            filteredProducts.addAll(newProducts);
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint("LoadMore Error : $e");
-    }
-
-    isLoadingMore = false;
-
-    setState(() {});
-  }
-
-  // check Favourite
-
-  bool isFavorite(Product product) {
-    return favoriteProducts.contains(product);
-  }
-
-  // =========================
-  // APPLY FILTER
-  // =========================
-  void applyFilter() {
-    String query = searchController.text.toLowerCase();
-
-    List<Product> temp = allProducts;
-
-    // CATEGORY FILTER
-    if (selectedCategories != "all") {
-      temp = temp.where((p) => p.category == selectedCategories).toList();
-    }
-
-    // SEARCH FILTER
-    if (query.isNotEmpty) {
-      temp = temp.where((p) => p.title.toLowerCase().contains(query)).toList();
-    }
-
-    if (!mounted) return;
-
-    setState(() {
-      filteredProducts = temp;
-    });
-  }
-
-  // =========================
-  // FETCH CATEGORY PRODUCTS
-  // =========================
-  Future<void> fetchByCategories(String category) async {
-    isLoading = true;
-
-    setState(() {});
-
-    currentCategory = category;
-    isCategoryMode = category != "all";
-    categorySkip = 0;
-
-    final response = await productService.getProductsByCategory(
-      category: category,
-      limit: limit,
-      skip: categorySkip,
-    );
-
-    if (response.success) {
-      allProducts = response.data!;
-      filteredProducts = response.data!;
-
-      hasMore = true;
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(response.message)));
-    }
-
-    isLoading = false;
-
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
+    final productProvider = context.watch<ProductProvider>();
+    final cartProvider = context.watch<CartProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
     return Scaffold(
       appBar: AppBar(
         title: const Text("HOME"),
@@ -254,13 +68,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
           Stack(
             children: [
               IconButton(
-                onPressed: () {
-                  
-                },
+                onPressed: () {},
                 icon: const Icon(Icons.shopping_cart),
               ),
 
-              if (cartCount > 0)
+              if (cartProvider.totalItems > 0)
                 Positioned(
                   right: 5,
                   top: 5,
@@ -274,7 +86,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     ),
 
                     child: Text(
-                      "$cartCount",
+                      "${cartProvider.totalItems}",
 
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
@@ -287,21 +99,18 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
       body: Padding(
         padding: const EdgeInsets.all(10),
-
         child: Column(
           children: [
             // =========================
             // SEARCH BAR
             // =========================
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(5),
 
               child: TextField(
                 controller: searchController,
 
-                onChanged: (value) {
-                  applyFilter();
-                },
+                onChanged: (value) {},
 
                 decoration: InputDecoration(
                   hintText: "Search products...",
@@ -324,23 +133,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
 
-                itemCount: categories.length,
+                itemCount: categoryProvider.categories.length,
 
                 itemBuilder: (context, index) {
-                  final category = categories[index];
-
+                  final category = categoryProvider.categories[index];
+                  final isSelected =
+                      categoryProvider.selectedCategory == category.slug;
                   return GestureDetector(
-                    onTap: () {
-                      selectedCategories = category.slug;
-
-                      setState(() {});
-
-                      if (category.slug == "all") {
-                        fetchProducts();
-                      } else {
-                        fetchByCategories(category.slug);
-                      }
-                    },
+                    onTap: () {},
 
                     child: Container(
                       margin: const EdgeInsets.all(8),
@@ -351,14 +151,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       ),
 
                       decoration: BoxDecoration(
-                        color: selectedCategories == category.slug
+                        color: isSelected
                             ? const Color(0xFF1C1C1C)
                             : Colors.grey.shade100,
 
                         borderRadius: BorderRadius.circular(20),
 
                         border: Border.all(
-                          color: selectedCategories == category.slug
+                          color: isSelected
                               ? const Color(0xFF1C1C1C)
                               : Colors.grey.shade300,
                         ),
@@ -366,12 +166,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
                       child: Center(
                         child: Text(
-                          category.name.toUpperCase(),
+                          category.slug.toUpperCase(),
 
                           style: TextStyle(
-                            color: selectedCategories == category.slug
-                                ? Colors.white
-                                : Colors.black,
+                            color: isSelected ? Colors.white : Colors.black,
                           ),
                         ),
                       ),
@@ -385,7 +183,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             // PRODUCT GRID
             // =========================
             Expanded(
-              child: isLoading
+              child: productProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : Column(
                       children: [
@@ -395,7 +193,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
                             padding: const EdgeInsets.all(10),
 
-                            itemCount: filteredProducts.length,
+                            itemCount: productProvider.products.length,
 
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
@@ -406,18 +204,28 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                 ),
 
                             itemBuilder: (context, index) {
-                              final product = filteredProducts[index];
+                              // SHOW BOTTOM LOADER
+                              if (index == productProvider.products.length) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+                              final product = productProvider.products[index];
 
                               return GestureDetector(
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
+                                  // Navigator.push(
+                                  //   context,
 
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          ProductDetailScreen(product: product),
-                                    ),
-                                  );
+                                  //   MaterialPageRoute(
+                                  //     builder: (_) => ProductDetailScreen(
+                                  //       product: product,
+                                  //     ),
+                                  //   ),
+                                  // );
                                 },
 
                                 child: Container(
@@ -447,7 +255,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                         ),
 
                                         child: Image.network(
-                                          product.images?.first ?? '',
+                                          product.thumbnail ?? '',
 
                                           height: 120,
                                           width: double.infinity,
@@ -512,12 +320,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
                                                     decoration: BoxDecoration(
                                                       color:
-                                                          favoriteProducts
-                                                              .contains(product)
-                                                          ? Colors.red.shade50
-                                                          : Colors
-                                                                .grey
-                                                                .shade100,
+                                                          Colors.grey.shade100,
 
                                                       shape: BoxShape.circle,
                                                     ),
@@ -525,59 +328,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                                     child: IconButton(
                                                       padding: EdgeInsets.zero,
 
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          if (favoriteProducts
-                                                              .contains(
-                                                                product,
-                                                              )) {
-                                                            favoriteProducts
-                                                                .remove(
-                                                                  product,
-                                                                );
-
-                                                            ScaffoldMessenger.of(
-                                                              context,
-                                                            ).showSnackBar(
-                                                              SnackBar(
-                                                                content: Text(
-                                                                  "${product.title} removed from favorites",
-                                                                ),
-                                                              ),
-                                                            );
-                                                          } else {
-                                                            favoriteProducts
-                                                                .add(product);
-
-                                                            ScaffoldMessenger.of(
-                                                              context,
-                                                            ).showSnackBar(
-                                                              SnackBar(
-                                                                content: Text(
-                                                                  "${product.title} added to Your favorites ❤️",
-                                                                ),
-                                                              ),
-                                                            );
-                                                          }
-                                                        });
-                                                      },
+                                                      onPressed: () {},
 
                                                       icon: Icon(
-                                                        favoriteProducts
-                                                                .contains(
-                                                                  product,
-                                                                )
-                                                            ? Icons.favorite
-                                                            : Icons
-                                                                  .favorite_border,
+                                                        Icons.favorite,
 
-                                                        color:
-                                                            favoriteProducts
-                                                                .contains(
-                                                                  product,
-                                                                )
-                                                            ? Colors.black
-                                                            : Colors.grey,
+                                                        color: Colors.grey,
 
                                                         size: 25,
                                                       ),
@@ -639,46 +395,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
                                                 child: ElevatedButton.icon(
                                                   onPressed: () {
-                                                    if (!cartProducts.contains(
-                                                      product,
-                                                    )) {
-                                                      setState(() {
-                                                        cartProducts.add(
-                                                          product,
-                                                        );
-                                                        cartCount =
-                                                            cartProducts.length;
-                                                      });
-
-                                                      ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            "${product.title} added to cart 🛒",
-                                                          ),
-                                                        ),
-                                                      );
-                                                    } else {
-                                                      ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            "${product.title} already in cart",
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }
+                                                    context
+                                                        .read<CartProvider>()
+                                                        .addToCart(product);
                                                   },
 
                                                   style: ElevatedButton.styleFrom(
                                                     backgroundColor:
-                                                        cartProducts.contains(
-                                                          product,
-                                                        )
-                                                        ? Colors.green
-                                                        : Colors.black,
+                                                        Colors.black,
 
                                                     foregroundColor:
                                                         Colors.white,
@@ -692,20 +416,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                                   ),
 
                                                   icon: Icon(
-                                                    cartProducts.contains(
-                                                          product,
-                                                        )
-                                                        ? Icons.check
-                                                        : Icons
-                                                              .shopping_cart_outlined,
+                                                    Icons
+                                                        .shopping_cart_outlined,
                                                   ),
 
                                                   label: Text(
-                                                    cartProducts.contains(
-                                                          product,
-                                                        )
-                                                        ? "Added"
-                                                        : "Add Cart",
+                                                    "Add to Cart",
                                                     style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -727,8 +443,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
                         // =========================
                         // BOTTOM LOADER
-                        // =========================
-                        if (isLoadingMore)
+                        // // =========================
+                        if (productProvider.isLoadingMore)
                           const Padding(
                             padding: EdgeInsets.all(15),
                             child: CircularProgressIndicator(),
