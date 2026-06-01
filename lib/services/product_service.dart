@@ -98,4 +98,29 @@ class ProductService {
       );
     }
   }
+
+  Future<ApiResponse<List<Product>>> searchProducts({
+    required String query,
+    required int limit,
+    required int skip,
+  }) async {
+    try {
+      final response = await dio.get(
+        'https://dummyjson.com/products/search',
+        queryParameters: {"q": query, "limit": limit, "skip": skip},
+      );
+      if (response.statusCode == 200) {
+        final List products = response.data['products'];
+        final data = products.map((e) => Product.fromJson(e)).toList();
+        return ApiResponse<List<Product>>(
+          success: true,
+          data: data,
+          message: "Search successful",
+        );
+      }
+      return ApiResponse(success: false, message: "Failed to search");
+    } catch (e) {
+      return ApiResponse(success: false, message: "Search Failed");
+    }
+  }
 }

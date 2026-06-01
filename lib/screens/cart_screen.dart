@@ -21,8 +21,6 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final counterProvider = context.watch<CounterProvider>();
-
     return Scaffold(
       appBar: AppBar(title: Text("Provider Example ")),
 
@@ -30,10 +28,7 @@ class _CartScreenState extends State<CartScreen> {
         padding: const EdgeInsets.all(50),
         child: Column(
           children: [
-            Text(
-              counterProvider.count.toString(),
-              style: const TextStyle(fontSize: 40),
-            ),
+            Text("hello", style: const TextStyle(fontSize: 40)),
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.only(left: 30),

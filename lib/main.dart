@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:test_1/Theme/app_theme.dart';
 import 'package:test_1/providers/cart_provider.dart';
 import 'package:test_1/providers/category_provider.dart';
-import 'package:test_1/providers/counter_provider.dart';
 import 'package:test_1/providers/product_provider.dart';
 
 import 'package:test_1/screens/login_screen.dart';
@@ -15,7 +14,6 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CounterProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
