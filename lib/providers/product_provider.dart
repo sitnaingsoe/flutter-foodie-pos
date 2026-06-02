@@ -114,6 +114,8 @@ class ProductProvider extends ChangeNotifier {
   //   }
   // }
 
+  
+
   Future<void> setCategory(String category) async {
     _selectedCategory = category;
     _products = [];

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:test_1/providers/cart_provider.dart';
 import 'package:test_1/providers/category_provider.dart';
+import 'package:test_1/providers/favorite_provider.dart';
 import 'package:test_1/providers/product_provider.dart';
+import 'package:test_1/widgets/add_to_cart_button.dart';
+import 'package:test_1/widgets/favorite_button.dart';
 import 'package:test_1/widgets/not_found.dart';
 
 class ProductsScreen extends StatefulWidget {
@@ -51,7 +54,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     final productProvider = context.watch<ProductProvider>();
     final cartProvider = context.watch<CartProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
-
+    final favoriteProvider = context.watch<FavoriteProvider>();
     return Scaffold(
       appBar: AppBar(
         title: const Text("HOME"),
@@ -105,9 +108,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   // CATEGORY LIST
                   SizedBox(
                     height: 60,
@@ -161,9 +162,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       },
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   // PRODUCT GRID
                   Expanded(
                     child: productProvider.isLoading
@@ -190,10 +189,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                     ),
 
                                 itemBuilder: (context, index) {
-                                  if (index >=
-                                      productProvider.filteredProducts.length) {
-                                    return const SizedBox.shrink();
-                                  }
                                   final product =
                                       productProvider.filteredProducts[index];
 
@@ -260,25 +255,114 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                                 ),
                                               ),
                                               const SizedBox(height: 3),
-                                              SizedBox(
-                                                width: double.infinity,
-                                                child: ElevatedButton(
-                                                  onPressed: () {
-                                                    context
-                                                        .read<CartProvider>()
-                                                        .addToCart(product);
-                                                  },
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                        backgroundColor:
-                                                            Colors.black,
-                                                        foregroundColor:
-                                                            Colors.white,
-                                                      ),
-                                                  child: const Text(
-                                                    "Add to Cart",
+                                              Row(
+                                                children: [
+                                                  // FAVORITE BUTTON
+                                                  FavoriteButton(
+                                                    isFavorite: favoriteProvider
+                                                        .isFavorite(product.id),
+                                                    onTap: () {
+                                                      final isFav =
+                                                          favoriteProvider
+                                                              .isFavorite(
+                                                                product.id,
+                                                              );
+                                                      if (isFav) {
+                                                        favoriteProvider
+                                                            .removeFromFavorites(
+                                                              product,
+                                                            );
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            backgroundColor:
+                                                                Colors.red,
+                                                            content: Text(
+                                                              "${product.title} removed Form Your Favorites",
+                                                              style: const TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      } else {
+                                                        favoriteProvider
+                                                            .addToFavorite(
+                                                              product,
+                                                            );
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              "${product.title} added to favorites ",
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+                                                    },
                                                   ),
-                                                ),
+
+                                                  // ADD TO CART BUTTON (takes remaining space)
+                                                  Expanded(
+                                                    child: AddToCartButton(
+                                                      isAdded: cartProvider
+                                                          .isInCart(product.id),
+                                                      onPressed: () {
+                                                        final added =
+                                                            cartProvider
+                                                                .addToCart(
+                                                                  product,
+                                                                );
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).hideCurrentSnackBar();
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            backgroundColor:
+                                                                added
+                                                                ? Colors.green
+                                                                : const Color.fromARGB(
+                                                                    255,
+                                                                    60,
+                                                                    60,
+                                                                    59,
+                                                                  ),
+                                                            behavior:
+                                                                SnackBarBehavior
+                                                                    .floating,
+
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    12,
+                                                                  ),
+                                                            ),
+                                                            content: Text(
+                                                              added
+                                                                  ? "${product.title} added to cart "
+                                                                  : "${product.title} is already in cart",
+                                                              style: const TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),
@@ -291,6 +375,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             ],
                           ),
                   ),
+                  // Bottom Loader
                   if (productProvider.isLoadingMore)
                     const Positioned(
                       bottom: 20,

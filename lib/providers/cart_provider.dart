@@ -9,20 +9,23 @@ class CartProvider extends ChangeNotifier {
   // ✅ SAFE GETTER
   List<CartItem> get items => _items;
 
+  bool isInCart(int productId) {
+    return _items.any((item) => item.product.id == productId);
+  }
+
   // =========================
   // ADD TO CART
   // =========================
-  void addToCart(Product product) {
-    final index = _items.indexWhere((item) => item.product.id == product.id);
 
-    if (index >= 0) {
-      _items[index].quantity++;
-    } else {
-      _items.add(CartItem(product: product));
+  bool addToCart(Product product) {
+    if (isInCart(product.id)) {
+      return false;
     }
-
+    _items.add(CartItem(product: (product)));
     notifyListeners();
+    return true;
   }
+
   // =========================
   // REMOVE FROM CART
   // =========================
@@ -74,6 +77,7 @@ class CartProvider extends ChangeNotifier {
   // double get totalPrice {
   //   return _items.fold(0.0, (sum, item) => sum + item.totalPrice);
   // }
+
   // =========================
   // CLEAR CART
   // =========================

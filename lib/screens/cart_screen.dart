@@ -1,9 +1,4 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:test_1/providers/counter_provider.dart';
-// import '../models/product_model.dart';
 
 class CartScreen extends StatefulWidget {
   // final List<Product> cartProducts;
@@ -34,19 +29,9 @@ class _CartScreenState extends State<CartScreen> {
               padding: const EdgeInsets.only(left: 30),
               child: Row(
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<CounterProvider>().decreasement();
-                    },
-                    child: Text("decrease"),
-                  ),
+                  ElevatedButton(onPressed: () {}, child: Text("decrease")),
                   const SizedBox(width: 40),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<CounterProvider>().increment();
-                    },
-                    child: Text("increase"),
-                  ),
+                  ElevatedButton(onPressed: () {}, child: Text("increase")),
                 ],
               ),
             ),
