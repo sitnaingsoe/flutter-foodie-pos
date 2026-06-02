@@ -372,17 +372,20 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                   );
                                 },
                               ),
+                              if (productProvider.isLoadingMore)
+                                const Positioned(
+                                  bottom: 20,
+                                  left: 0,
+                                  right: 0,
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
                             ],
                           ),
                   ),
+
                   // Bottom Loader
-                  if (productProvider.isLoadingMore)
-                    const Positioned(
-                      bottom: 20,
-                      left: 0,
-                      right: 0,
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
                 ],
               ),
             ),
