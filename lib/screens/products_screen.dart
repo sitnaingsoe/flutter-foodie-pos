@@ -61,38 +61,44 @@ class _ProductsScreenState extends State<ProductsScreen> {
         actions: const [CartBadge()],
       ),
 
-      // SAFE LOADING STATE
-      body: categoryProvider.categories.isEmpty
-          ? Center(child: const CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  // SEARCH
-                  const ProductSearchBar(),
-                  const SizedBox(height: 10),
-                  // CATEGORY LIST
-                  CategoryList(),
-                  const SizedBox(height: 10),
-                  // PRODUCT GRID
-                  Expanded(
-                    child: productProvider.isLoading
-                        ? Center(child: const CircularProgressIndicator())
-                        : productProvider.filteredProducts.isEmpty
-                        ? buildEmptySearch()
-                        : ProductGrid(),
-                  ),
-                  // Bottom Loader
-                  if (productProvider.isLoadingMore)
-                    const Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Center(child: CircularProgressIndicator()),
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque, // important 👈
+        onTap: () {
+          FocusScope.of(context).unfocus(); // closes keyboard + removes focus
+        },
+        child: categoryProvider.categories.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    // SEARCH
+                    const ProductSearchBar(),
+                    const SizedBox(height: 10),
+
+                    // CATEGORY LIST
+                    CategoryList(),
+                    const SizedBox(height: 10),
+
+                    // PRODUCT GRID
+                    Expanded(
+                      child: productProvider.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : productProvider.filteredProducts.isEmpty
+                          ? buildEmptySearch()
+                          : ProductGrid(),
                     ),
-                ],
+
+                    // Bottom Loader (FIXED: remove Positioned)
+                    if (productProvider.isLoadingMore)
+                      const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }
