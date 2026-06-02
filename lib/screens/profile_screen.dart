@@ -178,17 +178,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         mainAxisSpacing: 15,
                         childAspectRatio: 1.5,
                         children: [
-                          buildGridItem(Icons.favorite, "Favorite", Colors.red),
+                          buildGridItem(
+                            Icons.favorite,
+                            "Favorite",
+                            Colors.red,
+                            () => Navigator.pushNamed(context, "/favorites"),
+                          ),
                           buildGridItem(
                             Icons.shopping_cart,
                             "Orders",
                             Colors.blue,
+                            () => Navigator.pushNamed(context, "/favorites"),
                           ),
-                          buildGridItem(Icons.payment, "Payment", Colors.green),
+                          buildGridItem(
+                            Icons.payment,
+                            "Payment",
+                            Colors.green,
+                            () => Navigator.pushNamed(context, "/favorites"),
+                          ),
                           buildGridItem(
                             Icons.history,
                             "History",
                             Colors.orange,
+                            () => Navigator.pushNamed(context, "/favorites"),
                           ),
                         ],
                       ),
@@ -197,7 +209,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       height: 140,
                       width: double.infinity,
-
                       padding: const EdgeInsets.only(top: 5, left: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-
-Widget buildGridItem(IconData icon, String title, Color color) {
+Widget buildGridItem(
+  IconData icon,
+  String title,
+  Color color,
+  VoidCallback onTap,
+) {
   return Container(
     margin: const EdgeInsets.all(4),
-
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(14),
@@ -15,20 +18,23 @@ Widget buildGridItem(IconData icon, String title, Color color) {
         ),
       ],
     ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 35, color: color),
-        const SizedBox(height: 3),
-        Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-            color: Colors.black,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 30),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
