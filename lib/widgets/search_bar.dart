@@ -31,18 +31,27 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
         context.read<ProductProvider>().searchProducts(value);
       },
       decoration: InputDecoration(
-        hintText: "Search products...",
+        hintText: "Search products with name...",
         prefixIcon: const Icon(Icons.search),
-        suffixIcon: _controller.text.isNotEmpty
-            ? IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  _controller.clear();
-                  context.read<ProductProvider>().searchProducts('');
-                  setState(() {});
-                },
+        suffixIcon: context.watch<ProductProvider>().isSearching
+            ? const Padding(
+                padding: EdgeInsets.all(12),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
               )
-            : null,
+            : (_controller.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _controller.clear();
+                        context.read<ProductProvider>().searchProducts('');
+                        setState(() {});
+                      },
+                    )
+                  : null),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );

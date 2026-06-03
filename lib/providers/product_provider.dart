@@ -10,8 +10,10 @@ class ProductProvider extends ChangeNotifier {
   bool _isLoading = true;
   String? _error;
   String _searchQuery = '';
-  
 
+  bool _isSearching = false;
+
+  bool get isSearching => _isSearching;
   String get searchQuery => _searchQuery;
   List<Product> get products => _products;
   bool get isLoading => _isLoading;
@@ -75,6 +77,7 @@ class ProductProvider extends ChangeNotifier {
         return product.category == _selectedCategory;
       }).toList();
     }
+
     if (_searchQuery.isNotEmpty) {
       result = result.where((product) {
         final title = product.title.toLowerCase();
@@ -86,9 +89,16 @@ class ProductProvider extends ChangeNotifier {
   }
 
   void searchProducts(String query) {
+    _isSearching = true;
     _searchQuery = query;
     notifyListeners();
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _isSearching = false;
+      notifyListeners();
+    });
   }
+  
 
   // Future<void> searchProducts(String query) async {
   //   _searchQuery = query;
@@ -113,8 +123,6 @@ class ProductProvider extends ChangeNotifier {
   //     _error = e.toString();
   //   }
   // }
-
-  
 
   Future<void> setCategory(String category) async {
     _selectedCategory = category;

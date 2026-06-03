@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:test_1/providers/cart_provider.dart';
 import 'package:test_1/providers/category_provider.dart';
-import 'package:test_1/providers/favorite_provider.dart';
 import 'package:test_1/providers/product_provider.dart';
 import 'package:test_1/widgets/product_cart.dart';
 
@@ -46,8 +44,6 @@ class _ProductGridState extends State<ProductGrid> {
   final ScrollController scrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
-    final cartProvider = context.watch<CartProvider>();
-    final favoriteProvider = context.watch<FavoriteProvider>();
     final productProvider = context.watch<ProductProvider>();
 
     return Stack(

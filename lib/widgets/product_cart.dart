@@ -124,6 +124,7 @@ class ProductCard extends StatelessWidget {
                                     ? "${product.title} added to cart"
                                     : "${product.title} already in cart",
                               ),
+                              duration: const Duration(seconds: 1),
                             ),
                           );
                         },
