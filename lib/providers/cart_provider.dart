@@ -74,9 +74,12 @@ class CartProvider extends ChangeNotifier {
   // =========================
   // TOTAL PRICE
   // =========================
-  // double get totalPrice {
-  //   return _items.fold(0.0, (sum, item) => sum + item.totalPrice);
-  // }
+  double get totalPrice {
+    return _items.fold(
+      0.0,
+      (sum, item) => sum + (item.product.price! * item.quantity),
+    );
+  }
 
   // =========================
   // CLEAR CART

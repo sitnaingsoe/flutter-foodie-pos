@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:test_1/providers/cart_provider.dart';
+import 'package:test_1/widgets/cart_summary.dart';
+import 'package:test_1/widgets/cart_item_card.dart';
 
 class CartScreen extends StatefulWidget {
   // final List<Product> cartProducts;
@@ -16,24 +20,26 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = context.watch<CartProvider>();
     return Scaffold(
-      appBar: AppBar(title: Text("Provider Example ")),
-
-      body: Container(
-        padding: const EdgeInsets.all(50),
+      appBar: AppBar(title: const Text("My Cart")),
+      body: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
         child: Column(
           children: [
-            Text("hello", style: const TextStyle(fontSize: 40)),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(left: 30),
-              child: Row(
-                children: [
-                  ElevatedButton(onPressed: () {}, child: Text("decrease")),
-                  const SizedBox(width: 40),
-                  ElevatedButton(onPressed: () {}, child: Text("increase")),
-                ],
+            Expanded(
+              child: ListView.builder(
+                itemCount: cartProvider.items.length,
+                itemBuilder: (context, index) {
+                  final item = cartProvider.items[index];
+                  return CartItemCard(item: item);
+                },
               ),
+            ),
+            CartSummary(
+              totalItems: cartProvider.totalItems,
+              totalPrice: cartProvider.totalPrice,
+              onCheckout: () {},
             ),
           ],
         ),
