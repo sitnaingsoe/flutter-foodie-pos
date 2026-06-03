@@ -9,10 +9,7 @@ import 'package:test_1/widgets/favorite_button.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
 
-  const ProductCard({
-    super.key,
-    required this.product,
-  });
+  const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +20,7 @@ class ProductCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 5,
-          ),
-        ],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +35,7 @@ class ProductCard extends StatelessWidget {
               height: 120,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) {
+              errorBuilder: (_, _, _) {
                 return Image.asset(
                   'assets/images/default.png',
                   height: 120,
@@ -63,9 +55,7 @@ class ProductCard extends StatelessWidget {
                   product.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 5),
@@ -88,8 +78,7 @@ class ProductCard extends StatelessWidget {
                 Row(
                   children: [
                     FavoriteButton(
-                      isFavorite:
-                          favoriteProvider.isFavorite(product.id),
+                      isFavorite: favoriteProvider.isFavorite(product.id),
                       onTap: () {
                         if (favoriteProvider.isFavorite(product.id)) {
                           favoriteProvider.removeFromFavorites(product);
@@ -121,16 +110,15 @@ class ProductCard extends StatelessWidget {
                       child: AddToCartButton(
                         isAdded: cartProvider.isInCart(product.id),
                         onPressed: () {
-                          final added =
-                              cartProvider.addToCart(product);
+                          final added = cartProvider.addToCart(product);
 
-                          ScaffoldMessenger.of(context)
-                              .hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              backgroundColor:
-                                  added ? Colors.green : Colors.grey,
+                              backgroundColor: added
+                                  ? Colors.green
+                                  : Colors.grey,
                               content: Text(
                                 added
                                     ? "${product.title} added to cart"
