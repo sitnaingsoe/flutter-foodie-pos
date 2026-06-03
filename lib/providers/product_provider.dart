@@ -129,7 +129,6 @@ class ProductProvider extends ChangeNotifier {
     _products = [];
     skip = 0;
     hasMore = true;
-
     notifyListeners();
     await fetchProducts();
   }

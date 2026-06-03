@@ -118,7 +118,7 @@ class ProductCard extends StatelessWidget {
                             SnackBar(
                               backgroundColor: added
                                   ? Colors.green
-                                  : Colors.grey,
+                                  : const Color.fromARGB(255, 13, 11, 11),
                               content: Text(
                                 added
                                     ? "${product.title} added to cart"

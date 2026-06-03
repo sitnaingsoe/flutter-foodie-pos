@@ -1,10 +1,9 @@
-// ignore_for_file: unused_local_variable
-
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import "package:http/http.dart" as http;
+
+import '../services/token_service.dart';
+import '../services/api_service.dart';
+import '../repositories/auth_repository.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,86 +16,61 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    checkAuth();
+    _init();
   }
 
-  Future<void> checkAuth() async {
+  Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString("accessToken");
-    final refreshToken = prefs.getString("refreshToken");
 
-    await Future.delayed(const Duration(seconds: 2));
-    if (accessToken == null || refreshToken == null) {
-      goLogin();
-      return;
-    } else {
-      final isvalid = await verifyAccessToken(accessToken);
-      if (isvalid) {
-        goHome();
-      } else {
-        final refreshed = await verifyRefreshToken(refreshToken);
-        if (refreshed) {
-          goHome();
-        } else {
-          goLogin();
-        }
-      }
-    }
-  }
+    final repository = AuthRepository(
+      tokenService: TokenService(prefs),
+      authService: AuthService(),
+    );
 
-  Future<bool> verifyAccessToken(String accessToken) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final expiryString = prefs.getString("expiryTime");
-      if (expiryString == null) {
-        return false;
-      }
-      final expiryTime = DateTime.parse(expiryString);
+    final isLoggedIn = await repository.isAuthenticated();
 
-      if (DateTime.now().isAfter(expiryTime)) {
-        return false;
-      }
-      final url = 'https://dummyjson.com/auth/me';
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {"Authorization": "Bearer $accessToken"},
-      );
-      return response.statusCode == 200;
-    } catch (e) {
-      return false;
-    }
-  }
+    if (!mounted) return;
 
-  Future<bool> verifyRefreshToken(String refreshToken) async {
-    try {
-      final respone = await http.post(
-        Uri.parse('https://dummyjson.com/auth/refresh'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"refreshToken": refreshToken, "expiresInMins": 30}),
-      );
-      if (respone.statusCode == 200) {
-        final data = jsonDecode(respone.body);
-        final newAccessToken = data['accessToken'];
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("accessToken", newAccessToken);
-        return true;
-      }
-      return false;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  void goLogin() {
-    Navigator.pushReplacementNamed(context, "/login");
-  }
-
-  void goHome() {
-    Navigator.pushReplacementNamed(context, "/home");
+    Navigator.pushReplacementNamed(context, isLoggedIn ? "/home" : "/login");
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: CircularProgressIndicator()));
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF1C1C1C), Colors.black],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset("assets/images/logo.jpg", height: 120),
+
+            const SizedBox(height: 20),
+
+            const Text(
+              "My Shop",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            const Text(
+              "Everything you need in one place",
+              style: TextStyle(color: Colors.white70),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
