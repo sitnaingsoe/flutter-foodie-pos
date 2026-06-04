@@ -1,29 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:test_1/models/product_model.dart';
+import 'package:hive/hive.dart';
 
 class FavoriteProvider extends ChangeNotifier {
-  final List<Product> _favorites = [];
+  final Box<int> _favoriteBox = Hive.box<int>('favorites');
 
-  List<Product> get favorites => _favorites;
+  List<int> get favoriteIds => _favoriteBox.values.toList();
 
   bool isFavorite(int productId) {
-    return _favorites.any((item) => item.id == productId);
+    return _favoriteBox.containsKey(productId);
   }
 
-  bool addToFavorite(Product product) {
-    if (isFavorite(product.id)) {
-      return false;
-    }
-    _favorites.add(product);
-    notifyListeners();
-
-    return true;
-  }
-
-  void removeFromFavorites(Product product) {
-    if (isFavorite(product.id)) {
-      //_items.removeWhere((item) => item.product.id == product.id);
-      _favorites.removeWhere((item) => item.id == product.id);
+  void toggleFavorite(int productId) {
+    if (_favoriteBox.containsKey(productId)) {
+      _favoriteBox.delete(productId);
+    } else {
+      _favoriteBox.put(productId, productId);
     }
     notifyListeners();
   }

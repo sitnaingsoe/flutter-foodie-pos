@@ -80,29 +80,24 @@ class ProductCard extends StatelessWidget {
                     FavoriteButton(
                       isFavorite: favoriteProvider.isFavorite(product.id),
                       onTap: () {
-                        if (favoriteProvider.isFavorite(product.id)) {
-                          favoriteProvider.removeFromFavorites(product);
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: Colors.red,
-                              content: Text(
-                                "${product.title} removed from favorites",
-                              ),
+                        final isFavorite = favoriteProvider.isFavorite(
+                          product.id,
+                        );
+                        favoriteProvider.toggleFavorite(product.id);
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: isFavorite
+                                ? const Color.fromARGB(255, 184, 10, 10)
+                                : const Color.fromARGB(255, 8, 8, 8),
+                            content: Text(
+                              isFavorite
+                                  ? "${product.title} removed from favorites"
+                                  : "${product.title} add to favorites",
                             ),
-                          );
-                        } else {
-                          favoriteProvider.addToFavorite(product);
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: Colors.green,
-                              content: Text(
-                                "${product.title} added to favorites ❤️",
-                              ),
-                            ),
-                          );
-                        }
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
                       },
                     ),
 

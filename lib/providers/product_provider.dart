@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:test_1/api_response/api_response.dart';
 import 'package:test_1/models/product_model.dart';
@@ -5,44 +7,50 @@ import 'package:test_1/services/product_service.dart';
 
 class ProductProvider extends ChangeNotifier {
   final ProductService _service = ProductService();
+
   List<Product> _products = [];
 
   bool _isLoading = true;
   String? _error;
+
   String _searchQuery = '';
+  String _selectedCategory = 'all';
 
   bool _isSearching = false;
-
-  bool get isSearching => _isSearching;
-  String get searchQuery => _searchQuery;
-  List<Product> get products => _products;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-
-  String _selectedCategory = "all";
-  bool get isSearchEmpty => _searchQuery.isNotEmpty && _products.isEmpty;
-
-  String get selectedCategory => _selectedCategory;
+  Timer? _searchTimer;
 
   int limit = 10;
   int skip = 0;
   bool hasMore = true;
   bool isLoadingMore = false;
 
+  List<Product> get products => _products;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+
+  bool get isSearching => _isSearching;
+  String get searchQuery => _searchQuery;
+
+  String get selectedCategory => _selectedCategory;
+
+  bool get isSearchEmpty => _searchQuery.isNotEmpty && filteredProducts.isEmpty;
+
+  void bottomLoader() {
+    isLoadingMore = true;
+    notifyListeners();
+  }
+
   Future<void> fetchProducts() async {
     if (isLoadingMore || !hasMore) return;
 
     if (_products.isEmpty) {
       _isLoading = true;
-    } else {
-      isLoadingMore = true;
     }
-    notifyListeners();
 
     try {
       ApiResponse<List<Product>> response;
 
-      if (_selectedCategory == "all") {
+      if (_selectedCategory == 'all') {
         response = await _service.getProducts(limit: limit, skip: skip);
       } else {
         response = await _service.getProductsByCategory(
@@ -51,8 +59,10 @@ class ProductProvider extends ChangeNotifier {
           skip: skip,
         );
       }
+
       if (response.success == true && response.data != null) {
         final newProducts = response.data!;
+
         if (newProducts.isEmpty) {
           hasMore = false;
         } else {
@@ -63,16 +73,18 @@ class ProductProvider extends ChangeNotifier {
         _error = response.message;
       }
     } catch (e) {
-      e.toString();
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      isLoadingMore = false;
+      notifyListeners();
     }
-    _isLoading = false;
-    isLoadingMore = false;
-    notifyListeners();
   }
 
   List<Product> get filteredProducts {
     List<Product> result = _products;
-    if (_selectedCategory != "all") {
+
+    if (_selectedCategory != 'all') {
       result = result.where((product) {
         return product.category == _selectedCategory;
       }).toList();
@@ -80,64 +92,57 @@ class ProductProvider extends ChangeNotifier {
 
     if (_searchQuery.isNotEmpty) {
       result = result.where((product) {
-        final title = product.title.toLowerCase();
-        final query = _searchQuery.toLowerCase();
-        return title.contains(query);
+        return product.title.toLowerCase().contains(_searchQuery.toLowerCase());
       }).toList();
     }
+
     return result;
   }
 
   void searchProducts(String query) {
-    _isSearching = true;
     _searchQuery = query;
+
+    _isSearching = true;
     notifyListeners();
 
-    Future.delayed(const Duration(milliseconds: 500), () {
+    _searchTimer?.cancel();
+
+    _searchTimer = Timer(const Duration(milliseconds: 500), () {
       _isSearching = false;
       notifyListeners();
     });
   }
-  
-
-  // Future<void> searchProducts(String query) async {
-  //   _searchQuery = query;
-  //   _isSearching = true;
-  //   _products = [];
-  //   skip = 0;
-  //   hasMore = true;
-  //   notifyListeners();
-  //   try {
-  //     final response = await _service.searchProducts(
-  //       query: query,
-  //       limit: limit,
-  //       skip: 0,
-  //     );
-  //     if (response.success == true && response.data != null) {
-  //       _products = response.data!;
-  //       skip += limit;
-  //     } else {
-  //       _error = response.message;
-  //     }
-  //   } catch (e) {
-  //     _error = e.toString();
-  //   }
-  // }
-
-  Future<void> setCategory(String category) async {
-    _selectedCategory = category;
-    _products = [];
-    skip = 0;
-    hasMore = true;
-    notifyListeners();
-    await fetchProducts();
-  }
 
   void clearSearch() {
     _searchQuery = '';
-    _products = [];
+    _isSearching = false;
+    notifyListeners();
+  }
+
+  Future<void> setCategory(String category) async {
+    _selectedCategory = category;
+    _products.clear();
     skip = 0;
     hasMore = true;
-    fetchProducts();
+
+    notifyListeners();
+
+    await fetchProducts();
+  }
+
+  Future<void> refreshProducts() async {
+    _products.clear();
+    skip = 0;
+    hasMore = true;
+
+    notifyListeners();
+
+    await fetchProducts();
+  }
+
+  @override
+  void dispose() {
+    _searchTimer?.cancel();
+    super.dispose();
   }
 }

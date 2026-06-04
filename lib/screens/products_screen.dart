@@ -22,22 +22,29 @@ class _ProductsScreenState extends State<ProductsScreen> {
   @override
   void initState() {
     super.initState();
+    searchController.clear();
+    final category = context.read<CategoryProvider>();
+    if (category.categories.isEmpty) {
+      category.fetchCategories();
+    }
 
-    // SAFE INIT (fix async context warning)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CategoryProvider>().fetchCategories();
-      context.read<ProductProvider>().fetchProducts();
-    });
+    final provider = context.read<ProductProvider>();
+    if (provider.products.isEmpty) {
+      provider.fetchProducts();
+    }
 
-    // PAGINATION SCROLL
     scrollController.addListener(() {
-      final provider = context.read<ProductProvider>();
+      if (!scrollController.hasClients) return;
 
-      if (scrollController.position.pixels >=
-              scrollController.position.maxScrollExtent - 200 &&
+      final provider = context.read<ProductProvider>();
+      final position = scrollController.position;
+
+      if (position.pixels >= position.maxScrollExtent - 400 &&
           !provider.isLoadingMore &&
-          !provider.isLoading) {
+          !provider.isLoading &&
+          provider.hasMore) {
         provider.fetchProducts();
+        provider.bottomLoader();
       }
     });
   }
@@ -46,6 +53,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   void dispose() {
     searchController.dispose();
     scrollController.dispose();
+    searchController.clear();
     super.dispose();
   }
 
@@ -54,45 +62,51 @@ class _ProductsScreenState extends State<ProductsScreen> {
     final productProvider = context.watch<ProductProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("HOME"),
-        automaticallyImplyLeading: false,
-        actions: [CartBadge()],
-      ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("HOME"),
+          automaticallyImplyLeading: false,
+          actions: [CartBadge(searchController: searchController)],
+        ),
+        body: categoryProvider.categories.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    ProductSearchBar(controller: searchController),
+                    const SizedBox(height: 10),
 
-      // SAFE LOADING STATE
-      body: categoryProvider.categories.isEmpty
-          ? Center(child: const CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  // SEARCH
-                  const ProductSearchBar(),
-                  const SizedBox(height: 10),
-                  // CATEGORY LIST
-                  const CategoryList(),
-                  const SizedBox(height: 10),
-                  // PRODUCT GRID
-                  Expanded(
-                    child: productProvider.isLoading
-                        ? Center(child: const CircularProgressIndicator())
-                        : productProvider.filteredProducts.isEmpty
-                        ? buildEmptySearch()
-                        : ProductGrid(),
-                  ),
-                  // Bottom Loader
-                  if (productProvider.isLoadingMore)
-                    const Positioned(
-                      bottom: 20,
-                      left: 0,
-                      right: 0,
-                      child: Center(child: CircularProgressIndicator()),
+                    const CategoryList(),
+
+                    const SizedBox(height: 10),
+
+                    Expanded(
+                      child: productProvider.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : productProvider.filteredProducts.isEmpty
+                          ? buildEmptySearch()
+                          : RefreshIndicator(
+                              onRefresh: () async {
+                                await context
+                                    .read<ProductProvider>()
+                                    .refreshProducts();
+                              },
+                              child: ProductGrid(controller: scrollController),
+                            ),
                     ),
-                ],
+
+                    if (productProvider.isLoadingMore)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: CircularProgressIndicator(),
+                      ),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

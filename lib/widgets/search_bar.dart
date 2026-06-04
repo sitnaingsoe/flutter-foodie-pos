@@ -3,37 +3,51 @@ import 'package:provider/provider.dart';
 import 'package:test_1/providers/product_provider.dart';
 
 class ProductSearchBar extends StatefulWidget {
-  const ProductSearchBar({super.key});
+  final TextEditingController controller;
+  const ProductSearchBar({super.key, required this.controller});
 
   @override
   State<ProductSearchBar> createState() => _ProductSearchBarState();
 }
 
 class _ProductSearchBarState extends State<ProductSearchBar> {
-  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  late ProductProvider _productProvider;
 
   @override
   void initState() {
     super.initState();
+
+    _productProvider = context.read<ProductProvider>();
+
+    widget.controller.addListener(() {
+      setState(() {}); // Refresh clear button visibility
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    widget.controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isSearching = context.watch<ProductProvider>().isSearching;
+
     return TextField(
-      controller: _controller,
+      controller: widget.controller,
+      focusNode: _focusNode,
       onChanged: (value) {
-        context.read<ProductProvider>().searchProducts(value);
+        _productProvider.searchProducts(value);
       },
       decoration: InputDecoration(
         hintText: "Search products with name...",
         prefixIcon: const Icon(Icons.search),
-        suffixIcon: context.watch<ProductProvider>().isSearching
+
+        suffixIcon: isSearching
             ? const Padding(
                 padding: EdgeInsets.all(12),
                 child: SizedBox(
@@ -42,16 +56,17 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               )
-            : (_controller.text.isNotEmpty
+            : (widget.controller.text.isNotEmpty
                   ? IconButton(
                       icon: const Icon(Icons.clear),
                       onPressed: () {
-                        _controller.clear();
-                        context.read<ProductProvider>().searchProducts('');
-                        setState(() {});
+                        widget.controller.clear();
+                        _focusNode.unfocus();
+                        _productProvider.clearSearch();
                       },
                     )
                   : null),
+
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );

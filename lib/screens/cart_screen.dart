@@ -14,9 +14,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  // double get totalPrice {
-  //   return widget.cartProducts.fold(0, (sum, item) => sum + (item.price ?? 0));
-  // }
+
 
   @override
   Widget build(BuildContext context) {

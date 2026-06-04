@@ -7,11 +7,10 @@ class CategoryProvider extends ChangeNotifier {
   List<CategoryModel> _categories = [];
   List<CategoryModel> get categories => _categories;
   bool isLoading = false;
-  String selectedCategory  = "all";
+  String selectedCategory = "all";
 
   Future<void> fetchCategories() async {
     isLoading = true;
-    notifyListeners();
     try {
       final data = await _service.getCategories();
       _categories = data;
@@ -28,3 +27,4 @@ class CategoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+

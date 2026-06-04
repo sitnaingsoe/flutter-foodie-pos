@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:test_1/providers/cart_provider.dart';
+import 'package:test_1/providers/product_provider.dart';
 
 class CartBadge extends StatelessWidget {
-  const CartBadge({super.key});
+  final TextEditingController searchController;
+  const CartBadge({super.key, required this.searchController});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +16,9 @@ class CartBadge extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.shopping_cart),
           onPressed: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+            searchController.clear();
+            context.read<ProductProvider>().clearSearch();
             Navigator.pushNamed(context, "/cart");
           },
         ),

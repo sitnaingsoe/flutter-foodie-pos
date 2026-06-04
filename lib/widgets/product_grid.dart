@@ -1,75 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:test_1/providers/category_provider.dart';
 import 'package:test_1/providers/product_provider.dart';
+import 'package:test_1/screens/product_detail_screen.dart';
 import 'package:test_1/widgets/product_cart.dart';
 
-class ProductGrid extends StatefulWidget {
-  const ProductGrid({super.key});
+class ProductGrid extends StatelessWidget {
+  final ScrollController controller;
 
-  @override
-  State<ProductGrid> createState() => _ProductGridState();
-}
+  const ProductGrid({super.key, required this.controller});
 
-class _ProductGridState extends State<ProductGrid> {
-  @override
-  void initState() {
-    super.initState();
-
-    // SAFE INIT (fix async context warning)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CategoryProvider>().fetchCategories();
-      context.read<ProductProvider>().fetchProducts();
-    });
-
-    // PAGINATION SCROLL
-    scrollController.addListener(() {
-      final provider = context.read<ProductProvider>();
-
-      if (scrollController.position.pixels >=
-              scrollController.position.maxScrollExtent - 200 &&
-          !provider.isLoadingMore &&
-          !provider.isLoading) {
-        provider.fetchProducts();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
-  }
-
-  final ScrollController scrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
     final productProvider = context.watch<ProductProvider>();
 
-    return Stack(
-      children: [
-        GridView.builder(
-          controller: scrollController,
+    return GridView.builder(
+      controller: controller,
+      padding: const EdgeInsets.all(10),
+      itemCount:
+          productProvider.filteredProducts.length +
+          (productProvider.isLoadingMore ? 1 : 0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 10,
+        childAspectRatio: 0.66,
+      ),
+      itemBuilder: (context, index) {
+        if (index >= productProvider.filteredProducts.length) {
+          return const SizedBox.shrink();
+        }
 
-          padding: const EdgeInsets.all(10),
+        final product = productProvider.filteredProducts[index];
 
-          // FIXED PAGINATION ITEM COUNT
-          itemCount: productProvider.filteredProducts.length,
-
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 20,
-            crossAxisSpacing: 10,
-            childAspectRatio: 0.66,
-          ),
-
-          itemBuilder: (context, index) {
-            final product = productProvider.filteredProducts[index];
-
-            return ProductCard(product: product);
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: product),
+              ),
+            );
           },
-        ),
-      ],
+          child: ProductCard(product: product),
+        );
+      },
     );
   }
 }

@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:test_1/screens/home_screen.dart';
 import '../models/product_model.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:test_1/models/product_model.dart';
+import 'package:test_1/providers/cart_provider.dart';
+import 'package:test_1/providers/favorite_provider.dart';
+import 'package:test_1/widgets/add_to_cart_button.dart';
+import 'package:test_1/widgets/favorite_button.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -15,11 +22,37 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final favoriteProvider = context.watch<FavoriteProvider>();
+    final isFavorite = favoriteProvider.isFavorite(widget.product.id);
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: Text(widget.product.title),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.favorite))],
+        actions: [
+          IconButton(
+            onPressed: () {
+              favoriteProvider.toggleFavorite(widget.product.id);
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: isFavorite
+                      ? const Color.fromARGB(255, 184, 10, 10)
+                      : const Color.fromARGB(255, 8, 8, 8),
+                  content: Text(
+                    isFavorite
+                        ? "${widget.product.title} removed from favorites"
+                        : "${widget.product.title} add to favorites",
+                  ),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            },
+            icon: Icon(Icons.favorite),
+            color: isFavorite
+                ? const Color.fromARGB(255, 197, 9, 9)
+                : Colors.white,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(3),
