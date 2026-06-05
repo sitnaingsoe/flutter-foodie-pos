@@ -31,6 +31,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     final provider = context.read<ProductProvider>();
     if (provider.products.isEmpty) {
       provider.fetchProducts();
+      provider.fetchAllProducts();
     }
 
     scrollController.addListener(() {
@@ -53,7 +54,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
   void dispose() {
     searchController.dispose();
     scrollController.dispose();
-    searchController.clear();
     super.dispose();
   }
 
@@ -80,22 +80,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     const SizedBox(height: 10),
 
                     const CategoryList(),
-
                     const SizedBox(height: 10),
 
                     Expanded(
                       child: productProvider.isLoading
                           ? const Center(child: CircularProgressIndicator())
                           : productProvider.filteredProducts.isEmpty
-                          ? buildEmptySearch()
-                          : RefreshIndicator(
-                              onRefresh: () async {
-                                await context
-                                    .read<ProductProvider>()
-                                    .refreshProducts();
-                              },
-                              child: ProductGrid(controller: scrollController),
-                            ),
+                          ? NotFound()
+                          : ProductGrid(controller: scrollController),
                     ),
 
                     if (productProvider.isLoadingMore)

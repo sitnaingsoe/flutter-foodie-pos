@@ -34,6 +34,7 @@ class ProductGrid extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
+            
             Navigator.push(
               context,
               MaterialPageRoute(

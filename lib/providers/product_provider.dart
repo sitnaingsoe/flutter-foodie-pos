@@ -9,6 +9,7 @@ class ProductProvider extends ChangeNotifier {
   final ProductService _service = ProductService();
 
   List<Product> _products = [];
+  List<Product> _allProducts = [];
 
   bool _isLoading = true;
   String? _error;
@@ -19,11 +20,12 @@ class ProductProvider extends ChangeNotifier {
   bool _isSearching = false;
   Timer? _searchTimer;
 
-  int limit = 10;
+  int limit = 20;
   int skip = 0;
   bool hasMore = true;
   bool isLoadingMore = false;
 
+  List<Product> get allProducts => _allProducts;
   List<Product> get products => _products;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -38,6 +40,14 @@ class ProductProvider extends ChangeNotifier {
   void bottomLoader() {
     isLoadingMore = true;
     notifyListeners();
+  }
+
+  Future<void> fetchAllProducts() async {
+    ApiResponse<List<Product>> response;
+    response = await _service.getAllProducts();
+    if (response.success == true && response.data != null) {
+      _allProducts = response.data!;
+    }
   }
 
   Future<void> fetchProducts() async {
@@ -62,7 +72,6 @@ class ProductProvider extends ChangeNotifier {
 
       if (response.success == true && response.data != null) {
         final newProducts = response.data!;
-
         if (newProducts.isEmpty) {
           hasMore = false;
         } else {

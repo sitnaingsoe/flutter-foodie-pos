@@ -5,11 +5,13 @@ import 'package:test_1/providers/cart_provider.dart';
 
 class CartItemCard extends StatelessWidget {
   final CartItem item;
+
   const CartItemCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
-    final cartProvider = context.read<CartProvider>();
+    final cartProvider = context.watch<CartProvider>();
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       elevation: 2,
@@ -27,9 +29,9 @@ class CartItemCard extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
+
             const SizedBox(width: 12),
 
-            // ============= Details ====
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +45,9 @@ class CartItemCard extends StatelessWidget {
                       fontSize: 14,
                     ),
                   ),
+
                   const SizedBox(height: 6),
+
                   Text(
                     "\$${item.product.price}",
                     style: const TextStyle(
@@ -52,13 +56,15 @@ class CartItemCard extends StatelessWidget {
                       color: Colors.green,
                     ),
                   ),
+
                   const SizedBox(height: 10),
 
                   Row(
                     children: [
+                      // ➖ decrease
                       GestureDetector(
                         onTap: () {
-                          cartProvider.decreaseQty(item.product);
+                          cartProvider.decreaseQty(item.product.id);
                         },
                         child: Container(
                           padding: const EdgeInsets.all(6),
@@ -69,7 +75,9 @@ class CartItemCard extends StatelessWidget {
                           child: const Icon(Icons.remove, size: 18),
                         ),
                       ),
+
                       const SizedBox(width: 10),
+
                       Text(
                         item.quantity.toString(),
                         style: const TextStyle(
@@ -77,11 +85,13 @@ class CartItemCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+
                       const SizedBox(width: 10),
 
+                      // ➕ increase
                       GestureDetector(
                         onTap: () {
-                          cartProvider.increaseQty(item.product);
+                          cartProvider.increaseQty(item.product.id);
                         },
                         child: Container(
                           padding: const EdgeInsets.all(6),
@@ -92,10 +102,14 @@ class CartItemCard extends StatelessWidget {
                           child: const Icon(Icons.add, size: 18),
                         ),
                       ),
+
                       const Spacer(),
+
+                      // 🗑 remove
                       IconButton(
                         onPressed: () {
-                          cartProvider.removeFromCart(item.product);
+                          cartProvider.removeItem(item.product.id);
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
@@ -104,8 +118,10 @@ class CartItemCard extends StatelessWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.delete_outline,
-                        color: Colors.red,),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
                       ),
                     ],
                   ),

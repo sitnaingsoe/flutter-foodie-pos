@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 class FavoriteProvider extends ChangeNotifier {
+  
   final Box<int> _favoriteBox = Hive.box<int>('favorites');
 
   List<int> get favoriteIds => _favoriteBox.values.toList();

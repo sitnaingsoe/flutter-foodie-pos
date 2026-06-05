@@ -89,7 +89,7 @@ class ProductCard extends StatelessWidget {
                           SnackBar(
                             backgroundColor: isFavorite
                                 ? const Color.fromARGB(255, 184, 10, 10)
-                                : const Color.fromARGB(255, 8, 8, 8),
+                                : const Color.fromARGB(255, 79, 69, 69),
                             content: Text(
                               isFavorite
                                   ? "${product.title} removed from favorites"
@@ -105,19 +105,25 @@ class ProductCard extends StatelessWidget {
                       child: AddToCartButton(
                         isAdded: cartProvider.isInCart(product.id),
                         onPressed: () {
-                          final added = cartProvider.addToCart(product);
+                          final isInCart = cartProvider.isInCart(product.id);
+
+                          if (isInCart) {
+                            cartProvider.removeItem(product.id);
+                          } else {
+                            cartProvider.addToCart(product.id);
+                          }
 
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              backgroundColor: added
-                                  ? Colors.green
-                                  : const Color.fromARGB(255, 13, 11, 11),
+                              backgroundColor: isInCart
+                                  ? Colors.black
+                                  : Colors.green,
                               content: Text(
-                                added
-                                    ? "${product.title} added to cart"
-                                    : "${product.title} already in cart",
+                                isInCart
+                                    ? "${product.title} Added in cart"
+                                    : "${product.title} removed from cart"
                               ),
                               duration: const Duration(seconds: 1),
                             ),

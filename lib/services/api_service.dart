@@ -29,7 +29,7 @@ class AuthService {
         await prefs.setString("accessToken", data['accessToken'] ?? '');
         await prefs.setString("refreshToken", data['refreshToken']);
         await prefs.setString("user", jsonEncode(data));
-        final expiryTime = DateTime.now().add(const Duration(minutes: 5));
+        final expiryTime = DateTime.now().add(const Duration(days: 7));
         await prefs.setString("expiryTime", expiryTime.toIso8601String());
         return ApiResponse.success(data: user, message: "Login Success");
       } else {

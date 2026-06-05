@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../services/token_service.dart';
-import '../services/api_service.dart';
-import '../repositories/auth_repository.dart';
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -24,16 +20,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final prefs = await SharedPreferences.getInstance();
 
-    final repository = AuthRepository(
-      tokenService: TokenService(prefs),
-      authService: AuthService(),
+    final accessToken = prefs.getString("accessToken");
+
+    Navigator.pushReplacementNamed(
+      context,
+      accessToken != null ? "/home" : "/login",
     );
-
-    final isLoggedIn = await repository.isAuthenticated();
-
-    if (!mounted) return;
-
-    Navigator.pushReplacementNamed(context, isLoggedIn ? "/home" : "/login");
   }
 
   @override

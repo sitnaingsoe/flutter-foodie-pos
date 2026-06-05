@@ -28,7 +28,6 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
 
   @override
   void dispose() {
-    widget.controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }

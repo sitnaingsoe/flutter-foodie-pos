@@ -1,91 +1,74 @@
 import 'package:flutter/material.dart';
-import 'package:test_1/models/cartitem_model.dart';
-import 'package:test_1/models/product_model.dart';
+import 'package:hive/hive.dart';
 
 class CartProvider extends ChangeNotifier {
-  // ✅ REAL CART STORAGE
-  final List<CartItem> _items = [];
+  final Box<int> _cartBox = Hive.box<int>('cart');
 
-  // ✅ SAFE GETTER
-  List<CartItem> get items => _items;
+  int get totalItemcount => _cartBox.length;
 
-  bool isInCart(int productId) {
-    return _items.any((item) => item.product.id == productId);
+  int get totalQuantity {
+    return _cartBox.values.fold(0, (sum, qty) => sum + qty);
   }
 
-  // =========================
-  // ADD TO CART
-  // =========================
+  Map<int, int> get cartItems {
+    return _cartBox.toMap().cast<int, int>();
+  }
 
-  bool addToCart(Product product) {
-    if (isInCart(product.id)) {
+  bool isInCart(int productId) {
+    return _cartBox.containsKey(productId);
+  }
+
+  int quantity(int productId) {
+    return _cartBox.get(productId) ?? 0;
+  }
+
+  bool addToCart(int productId) {
+    if (_cartBox.containsKey(productId)) {
       return false;
     }
-    _items.add(CartItem(product: (product)));
+    _cartBox.put(productId, 1);
     notifyListeners();
     return true;
   }
 
-  // =========================
-  // REMOVE FROM CART
-  // =========================
-  void removeFromCart(Product product) {
-    _items.removeWhere((item) => item.product.id == product.id);
-
+  void increaseQty(int productId) {
+    final current = _cartBox.get(productId) ?? 0;
+    _cartBox.put(productId, current + 1);
     notifyListeners();
   }
 
-  // =========================
-  // INCREASE QTY
-  // =========================
-  void increaseQty(Product product) {
-    final index = _items.indexWhere((item) => item.product.id == product.id);
-
-    if (index != -1) {
-      _items[index].quantity++;
-      notifyListeners();
+  void decreaseQty(int productId) {
+    final current = _cartBox.get(productId) ?? 0;
+    if (current <= 1) {
+      _cartBox.delete(productId);
+    } else {
+      _cartBox.put(productId, current - 1);
     }
+    notifyListeners();
   }
 
-  // =========================
-  // DECREASE QTY
-  // =========================
-  void decreaseQty(Product product) {
-    final index = _items.indexWhere((item) => item.product.id == product.id);
-
-    if (index != -1) {
-      if (_items[index].quantity > 1) {
-        _items[index].quantity--;
-      } else {
-        _items.removeAt(index);
-      }
-
-      notifyListeners();
-    }
+  void removeItem(int productId) {
+    _cartBox.delete(productId);
+    notifyListeners();
   }
 
-  // =========================
-  // TOTAL ITEMS
-  // =========================
-  int get totalItems {
-    return _items.fold(0, (sum, item) => sum + item.quantity);
-  }
-
-  // =========================
-  // TOTAL PRICE
-  // =========================
-  double get totalPrice {
-    return _items.fold(
-      0.0,
-      (sum, item) => sum + (item.product.price! * item.quantity),
-    );
-  }
-
-  // =========================
-  // CLEAR CART
-  // =========================
   void clearCart() {
-    _items.clear();
+    _cartBox.clear();
     notifyListeners();
+  }
+
+  double totalPrice(List products) {
+    double total = 0;
+
+    for (final entry in _cartBox.toMap().entries) {
+      final productId = entry.key;
+      final qty = entry.value;
+      final matched = products.where((p) => p.id == productId);
+      if (matched.isNotEmpty) {
+        total += matched.first.price * qty;
+      }
+    }
+
+    return total;
   }
 }

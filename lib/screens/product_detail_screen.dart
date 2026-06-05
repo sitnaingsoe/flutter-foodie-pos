@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:test_1/screens/home_screen.dart';
 import '../models/product_model.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:test_1/models/product_model.dart';
-import 'package:test_1/providers/cart_provider.dart';
+
 import 'package:test_1/providers/favorite_provider.dart';
-import 'package:test_1/widgets/add_to_cart_button.dart';
-import 'package:test_1/widgets/favorite_button.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -19,6 +15,13 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int quantity = 1;
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

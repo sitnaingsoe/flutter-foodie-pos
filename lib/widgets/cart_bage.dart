@@ -9,7 +9,7 @@ class CartBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cartProvider = context.watch<CartProvider>();
+    final cartItemCount = context.watch<CartProvider>().totalQuantity;
 
     return Stack(
       children: [
@@ -23,7 +23,7 @@ class CartBadge extends StatelessWidget {
           },
         ),
 
-        if (cartProvider.totalItems > 0)
+        if (cartItemCount > 0)
           Positioned(
             top: 5,
             right: 5,
@@ -31,7 +31,7 @@ class CartBadge extends StatelessWidget {
               radius: 9,
               backgroundColor: Colors.red,
               child: Text(
-                "${cartProvider.totalItems}",
+                "$cartItemCount",
                 style: const TextStyle(color: Colors.white, fontSize: 10),
               ),
             ),
