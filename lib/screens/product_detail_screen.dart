@@ -22,7 +22,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _focusNode.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final favoriteProvider = context.watch<FavoriteProvider>();

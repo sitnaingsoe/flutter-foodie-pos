@@ -11,6 +11,8 @@ class ProductProvider extends ChangeNotifier {
   List<Product> _products = [];
   List<Product> _allProducts = [];
 
+  bool _isFetching = false;
+
   bool _isLoading = true;
   String? _error;
 
@@ -20,7 +22,7 @@ class ProductProvider extends ChangeNotifier {
   bool _isSearching = false;
   Timer? _searchTimer;
 
-  int limit = 20;
+  int limit = 10;
   int skip = 0;
   bool hasMore = true;
   bool isLoadingMore = false;
@@ -53,6 +55,12 @@ class ProductProvider extends ChangeNotifier {
   Future<void> fetchProducts() async {
     if (isLoadingMore || !hasMore) return;
 
+    if (_error != null && _products.isEmpty) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
     if (_products.isEmpty) {
       _isLoading = true;
     }
@@ -70,8 +78,9 @@ class ProductProvider extends ChangeNotifier {
         );
       }
 
-      if (response.success == true && response.data != null) {
+      if (response.success && response.data != null) {
         final newProducts = response.data!;
+
         if (newProducts.isEmpty) {
           hasMore = false;
         } else {
@@ -79,10 +88,11 @@ class ProductProvider extends ChangeNotifier {
           skip += limit;
         }
       } else {
-        _error = response.message;
+        // Show backend/network error
+        _error = response.error ?? response.message;
       }
     } catch (e) {
-      _error = e.toString();
+      e.toString();
     } finally {
       _isLoading = false;
       isLoadingMore = false;
@@ -141,12 +151,30 @@ class ProductProvider extends ChangeNotifier {
 
   Future<void> refreshProducts() async {
     _products.clear();
+
     skip = 0;
     hasMore = true;
+    isLoadingMore = false;
+    _error = null;
 
+    _isLoading = true;
     notifyListeners();
 
-    await fetchProducts();
+    try {
+      final response = await _service.getProducts(limit: limit, skip: skip);
+
+      if (response.success == true && response.data != null) {
+        _products = response.data!;
+        skip += limit;
+      } else {
+        _error = response.message;
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   @override

@@ -48,30 +48,50 @@ class ProductService {
       if (response.statusCode == 200) {
         final List products = response.data['products'];
 
-        final data = products.map((e) => Product.fromJson(e)).toList();
-
         return ApiResponse(
           success: true,
-          data: data,
+          data: products.map((e) => Product.fromJson(e)).toList(),
           message: "Products loaded successfully",
         );
       }
 
       return ApiResponse(success: false, message: "Failed to load products");
     } on DioException catch (e) {
-      debugPrint(e.toString());
+      debugPrint("Dio Error: ${e.type}");
 
-      return ApiResponse(
-        success: false,
-        message: "Request Failed",
-        error: e.response?.data['message'] ?? "Network Error",
-      );
+      String message;
+
+      switch (e.type) {
+        case DioExceptionType.connectionError:
+          message = "No internet connection";
+          break;
+
+        case DioExceptionType.connectionTimeout:
+          message = "Connection timeout";
+          break;
+
+        case DioExceptionType.receiveTimeout:
+          message = "Server response timeout";
+          break;
+
+        case DioExceptionType.sendTimeout:
+          message = "Request timeout";
+          break;
+
+        case DioExceptionType.badResponse:
+          message = e.response?.data['message'] ?? "Server returned an error";
+          break;
+
+        default:
+          message = "Something went wrong";
+      }
+
+      return ApiResponse(success: false, message: message, error: e.toString());
     } catch (e) {
-      debugPrint(e.toString());
       return ApiResponse(
-        error: e.toString(),
         success: false,
-        message: e.toString(),
+        message: "Unexpected error occurred",
+        error: e.toString(),
       );
     }
   }

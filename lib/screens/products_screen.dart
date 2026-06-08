@@ -4,9 +4,11 @@ import 'package:test_1/providers/category_provider.dart';
 import 'package:test_1/providers/product_provider.dart';
 import 'package:test_1/widgets/cart_bage.dart';
 import 'package:test_1/widgets/category_list.dart';
+import 'package:test_1/widgets/error.dart';
 import 'package:test_1/widgets/not_found.dart';
-import 'package:test_1/widgets/product_cart.dart';
-import 'package:test_1/screens/product_detail_screen.dart';
+import 'package:test_1/widgets/product_grid.dart';
+import 'package:test_1/widgets/product_skeleton_grid.dart';
+import 'package:test_1/widgets/search_bar.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -16,144 +18,106 @@ class ProductsScreen extends StatefulWidget {
 }
 
 class _ProductsScreenState extends State<ProductsScreen> {
-  late final ScrollController scrollController;
+  final ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
-    scrollController = ScrollController()..addListener(_onScroll);
     searchController.clear();
-
     final category = context.read<CategoryProvider>();
-    final productProvider = context.read<ProductProvider>();
-
     if (category.categories.isEmpty) {
       category.fetchCategories();
     }
 
-    if (productProvider.products.isEmpty) {
-      productProvider.fetchProducts();
-    }
-  }
-
-  void _onScroll() {
-    if (!scrollController.hasClients) return;
-
     final provider = context.read<ProductProvider>();
-
-    if (scrollController.position.pixels >
-            scrollController.position.maxScrollExtent - 300 &&
-        !provider.isLoadingMore &&
-        provider.hasMore) {
+    if (provider.products.isEmpty) {
       provider.fetchProducts();
     }
-  }
 
-  Future<void> _refresh() async {
-    await Future.wait([
-      context.read<ProductProvider>().refreshProducts(),
-      context.read<CategoryProvider>().fetchCategories(),
-    ]);
+    scrollController.addListener(() {
+      if (!scrollController.hasClients) return;
+
+      final provider = context.read<ProductProvider>();
+      if (provider.isLoadingMore || !provider.hasMore) return;
+      final position = scrollController.position;
+      if (position.pixels >= position.maxScrollExtent - 200 &&
+          !provider.isLoadingMore &&
+          !provider.isLoading &&
+          provider.hasMore) {
+        provider.fetchProducts();
+        provider.bottomLoader();
+      }
+    });
   }
 
   @override
   void dispose() {
-    scrollController.dispose();
     searchController.dispose();
-    _focusNode.dispose();
+    scrollController.dispose();
+    searchController.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final productProvider = context.watch<ProductProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Amazon Store"),
-        automaticallyImplyLeading: false,
-        actions: [CartBadge(searchController: searchController)],
-      ),
-
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: CustomScrollView(
-          controller: scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-
-          slivers: [
-            // 🔍 SEARCH + CATEGORY (Sticky style)
-            SliverToBoxAdapter(
-              child: Padding(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("My Shop"),
+          automaticallyImplyLeading: false,
+          actions: [CartBadge(searchController: searchController)],
+        ),
+        body: productProvider.error != null
+            ? ErrorScreen(
+                onRetry: () async {
+                  await context.read<ProductProvider>().refreshProducts();
+                  await context.read<CategoryProvider>().fetchCategories();
+                },
+              )
+            : categoryProvider.categories.isEmpty &&
+                  productProvider.products.isEmpty
+            ? const ProductSkeletonGrid()
+            : Padding(
                 padding: const EdgeInsets.all(10),
                 child: Column(
                   children: [
-                    TextField(
-                      controller: searchController,
-                      decoration: InputDecoration(
-                        hintText: "Search products...",
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        context.read<ProductProvider>().searchProducts(value);
-                      },
-                    ),
-
+                    ProductSearchBar(controller: searchController),
                     const SizedBox(height: 10),
                     const CategoryList(),
                     const SizedBox(height: 10),
+                    Expanded(
+                      child: productProvider.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : productProvider.filteredProducts.isEmpty
+                          ? NotFound()
+                          : RefreshIndicator(
+                              onRefresh: () async {
+                                await context
+                                    .read<ProductProvider>()
+                                    .refreshProducts();
+                              },
+                              child: ProductGrid(controller: scrollController),
+                            ),
+                    ),
+
+                    if (productProvider.isLoadingMore)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 5),
+                        child: CircularProgressIndicator(),
+                      ),
+                    if (productProvider.error != null)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 5),
+                        child: CircularProgressIndicator(),
+                      ),
                   ],
                 ),
               ),
-            ),
-
-            // 📦 EMPTY STATE
-            if (productProvider.filteredProducts.isEmpty &&
-                !productProvider.isLoading)
-              const SliverToBoxAdapter(child: NotFound()),
-
-            // 🛍 PRODUCT GRID (Amazon style)
-            SliverPadding(
-              padding: const EdgeInsets.all(10),
-              sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final product = productProvider.filteredProducts[index];
-
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ProductDetailScreen(product: product),
-                        ),
-                      );
-                    },
-                    child: ProductCard(product: product),
-                  );
-                }, childCount: productProvider.filteredProducts.length),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 0.65,
-                ),
-              ),
-            ),
-
-            // 🔄 LOADING MORE
-            if (productProvider.isLoadingMore)
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }
