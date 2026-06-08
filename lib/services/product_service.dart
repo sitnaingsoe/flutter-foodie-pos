@@ -10,30 +10,30 @@ class ProductService {
   final Dio dio = Dio()
     ..interceptors.add(PrettyDioLogger(requestBody: true, responseBody: true));
 
-  Future<ApiResponse<List<Product>>> getAllProducts() async {
-    try {
-      final response = await dio.get(
-        "https://dummyjson.com/products",
-        queryParameters: {"limit": 168, "skip": 0},
-      );
-      if (response.statusCode == 200) {
-        final List products = response.data['products'];
-        final data = products.map((e) => Product.fromJson(e)).toList();
-        return ApiResponse(
-          success: true,
-          data: data,
-          message: "Products loaded successfully",
-        );
-      }
-      return ApiResponse(
-        success: false,
-        message: "Products loaded unsuccessful",
-      );
-    } catch (e) {
-      e.toString();
-      return ApiResponse(success: false, message: "Error");
-    }
-  }
+  // Future<ApiResponse<List<Product>>> getAllProducts() async {
+  //   try {
+  //     final response = await dio.get(
+  //       "https://dummyjson.com/products",
+  //       queryParameters: {"limit": 168, "skip": 0},
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final List products = response.data['products'];
+  //       final data = products.map((e) => Product.fromJson(e)).toList();
+  //       return ApiResponse(
+  //         success: true,
+  //         data: data,
+  //         message: "Products loaded successfully",
+  //       );
+  //     }
+  //     return ApiResponse(
+  //       success: false,
+  //       message: "Products loaded unsuccessful",
+  //     );
+  //   } catch (e) {
+  //     e.toString();
+  //     return ApiResponse(success: false, message: "Error");
+  //   }
+  // }
 
   Future<ApiResponse<List<Product>>> getProducts({
     required int limit,

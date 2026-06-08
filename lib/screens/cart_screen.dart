@@ -18,7 +18,7 @@ class _CartScreenState extends State<CartScreen> {
   void initState() {
     super.initState();
     final provider = context.read<ProductProvider>();
-    provider.fetchAllProducts();
+    provider.fetchProducts();
   }
 
   @override

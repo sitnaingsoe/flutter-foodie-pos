@@ -42,13 +42,13 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchAllProducts() async {
-    ApiResponse<List<Product>> response;
-    response = await _service.getAllProducts();
-    if (response.success == true && response.data != null) {
-      _allProducts = response.data!;
-    }
-  }
+  // Future<void> fetchAllProducts() async {
+  //   ApiResponse<List<Product>> response;
+  //   response = await _service.getAllProducts();
+  //   if (response.success == true && response.data != null) {
+  //     _allProducts = response.data!;
+  //   }
+  // }
 
   Future<void> fetchProducts() async {
     if (isLoadingMore || !hasMore) return;
@@ -116,7 +116,7 @@ class ProductProvider extends ChangeNotifier {
 
     _searchTimer?.cancel();
 
-    _searchTimer = Timer(const Duration(milliseconds: 500), () {
+    _searchTimer = Timer(const Duration(seconds: 1), () {
       _isSearching = false;
       notifyListeners();
     });
@@ -153,5 +153,14 @@ class ProductProvider extends ChangeNotifier {
   void dispose() {
     _searchTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> loadMoreProducts() async {
+    if (isLoadingMore || !hasMore) return;
+
+    isLoadingMore = true;
+    notifyListeners();
+
+    await fetchProducts();
   }
 }
