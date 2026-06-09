@@ -2,38 +2,68 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:test_1/models/category_model.dart';
-
 import '../api_response/api_response.dart';
 import '../models/product_model.dart';
 
 class ProductService {
-  final Dio dio = Dio()
-    ..interceptors.add(PrettyDioLogger(requestBody: true, responseBody: true));
+  
+  final Dio dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(
+        seconds: 5,
+      ),
+      receiveTimeout: const Duration(
+        seconds: 5,
+      ),
+      sendTimeout: const Duration(seconds: 5),
+    ),
+  );
+  
+  String _handleDioError(DioException e) {
+    debugPrint("Dio Error Type: ${e.type}");
+    switch (e.type) {
+      case DioExceptionType.connectionError:
+        return "no internet connection";
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.sendTimeout:
+        return "request time out";
+      case DioExceptionType.badResponse:
+        return e.response?.data['message'] ?? "sever error";
+      default:
+        return "something want wrong";
+    }
+  }
 
-  // Future<ApiResponse<List<Product>>> getAllProducts() async {
-  //   try {
-  //     final response = await dio.get(
-  //       "https://dummyjson.com/products",
-  //       queryParameters: {"limit": 168, "skip": 0},
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final List products = response.data['products'];
-  //       final data = products.map((e) => Product.fromJson(e)).toList();
-  //       return ApiResponse(
-  //         success: true,
-  //         data: data,
-  //         message: "Products loaded successfully",
-  //       );
-  //     }
-  //     return ApiResponse(
-  //       success: false,
-  //       message: "Products loaded unsuccessful",
-  //     );
-  //   } catch (e) {
-  //     e.toString();
-  //     return ApiResponse(success: false, message: "Error");
-  //   }
-  // }
+  Future<ApiResponse<List<Product>>> getAllProducts() async {
+    try {
+      final response = await dio.get(
+        "https://dummyjson.com/products",
+        queryParameters: {"limit": 168, "skip": 0},
+      );
+      if (response.statusCode == 200) {
+        final List products = response.data['products'];
+        final data = products.map((e) => Product.fromJson(e)).toList();
+        return ApiResponse(
+          success: true,
+          data: data,
+          message: "Products loaded successfully",
+        );
+      }
+      return ApiResponse(
+        success: false,
+        message: "Products loaded unsuccessful",
+      );
+    } on DioException catch (e) {
+      return ApiResponse(
+        success: false,
+        message: _handleDioError(e),
+        error: e.toString(),
+      );
+    } catch (e) {
+      return ApiResponse(success: false, message: "Error", error: e.toString());
+    }
+  }
 
   Future<ApiResponse<List<Product>>> getProducts({
     required int limit,
@@ -57,36 +87,11 @@ class ProductService {
 
       return ApiResponse(success: false, message: "Failed to load products");
     } on DioException catch (e) {
-      debugPrint("Dio Error: ${e.type}");
-
-      String message;
-
-      switch (e.type) {
-        case DioExceptionType.connectionError:
-          message = "No internet connection";
-          break;
-
-        case DioExceptionType.connectionTimeout:
-          message = "Connection timeout";
-          break;
-
-        case DioExceptionType.receiveTimeout:
-          message = "Server response timeout";
-          break;
-
-        case DioExceptionType.sendTimeout:
-          message = "Request timeout";
-          break;
-
-        case DioExceptionType.badResponse:
-          message = e.response?.data['message'] ?? "Server returned an error";
-          break;
-
-        default:
-          message = "Something went wrong";
-      }
-
-      return ApiResponse(success: false, message: message, error: e.toString());
+      return ApiResponse(
+        success: false,
+        message: _handleDioError(e),
+        error: e.toString(),
+      );
     } catch (e) {
       return ApiResponse(
         success: false,
@@ -107,6 +112,9 @@ class ProductService {
       } else {
         return [];
       }
+    } on DioException catch (e) {
+      debugPrint("Categories Dio Error: ${_handleDioError(e)}");
+      return [];
     } catch (e) {
       return [];
     }
@@ -134,6 +142,12 @@ class ProductService {
       return ApiResponse<List<Product>>(
         success: false,
         message: "Error occurred",
+      );
+    } on DioException catch (e) {
+      return ApiResponse(
+        success: false,
+        message: _handleDioError(e),
+        error: e.toString(),
       );
     } catch (e) {
       return ApiResponse<List<Product>>(
@@ -164,8 +178,18 @@ class ProductService {
         );
       }
       return ApiResponse(success: false, message: "Failed to search");
+    } on DioException catch (e) {
+      return ApiResponse(
+        success: false,
+        message: _handleDioError(e),
+        error: e.toString(),
+      );
     } catch (e) {
-      return ApiResponse(success: false, message: "Search Failed");
+      return ApiResponse(
+        success: false,
+        message: "Search Failed",
+        error: e.toString(),
+      );
     }
   }
 }

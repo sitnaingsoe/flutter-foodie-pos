@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:test_1/providers/category_provider.dart';
 import 'package:test_1/providers/product_provider.dart';
+import 'package:test_1/screens/product_detail_screen.dart';
 import 'package:test_1/widgets/cart_bage.dart';
 import 'package:test_1/widgets/category_list.dart';
 import 'package:test_1/widgets/error.dart';
 import 'package:test_1/widgets/not_found.dart';
+import 'package:test_1/widgets/product_cart.dart';
 import 'package:test_1/widgets/product_grid.dart';
 import 'package:test_1/widgets/product_skeleton_grid.dart';
 import 'package:test_1/widgets/search_bar.dart';
@@ -25,44 +27,46 @@ class _ProductsScreenState extends State<ProductsScreen> {
   void initState() {
     super.initState();
     searchController.clear();
-    final category = context.read<CategoryProvider>();
-    if (category.categories.isEmpty) {
-      category.fetchCategories();
-    }
 
-    final provider = context.read<ProductProvider>();
-    if (provider.products.isEmpty) {
-      provider.fetchProducts();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CategoryProvider>().fetchCategories();
 
-    scrollController.addListener(() {
-      if (!scrollController.hasClients) return;
-
-      final provider = context.read<ProductProvider>();
-      if (provider.isLoadingMore || !provider.hasMore) return;
-      final position = scrollController.position;
-      if (position.pixels >= position.maxScrollExtent - 200 &&
-          !provider.isLoadingMore &&
-          !provider.isLoading &&
-          provider.hasMore) {
-        provider.fetchProducts();
-        provider.bottomLoader();
-      }
+      context.read<ProductProvider>().refreshProducts();
     });
+
   }
 
   @override
   void dispose() {
     searchController.dispose();
     scrollController.dispose();
-    searchController.clear();
     super.dispose();
+  }
+
+  bool _onScrollNotification(ScrollNotification notification) {
+    final provider = context.read<ProductProvider>();
+
+    if (provider.isLoading ||
+        provider.isLoadingMore ||
+        !provider.hasMore ||
+        provider.error != null) {
+      return false;
+    }
+
+    if (notification.metrics.pixels >=
+        notification.metrics.maxScrollExtent - 200) {
+      provider.fetchProducts();
+      provider.bottomLoader();
+    }
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     final productProvider = context.watch<ProductProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
+
+    final bool isInitialLoadError = productProvider.error != null;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -72,7 +76,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
           automaticallyImplyLeading: false,
           actions: [CartBadge(searchController: searchController)],
         ),
-        body: productProvider.error != null
+        // products_screen.dart ထဲက body နေရာတွင် အစားထိုးရန်
+        body: isInitialLoadError
             ? ErrorScreen(
                 onRetry: () async {
                   await context.read<ProductProvider>().refreshProducts();
@@ -84,37 +89,92 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ? const ProductSkeletonGrid()
             : Padding(
                 padding: const EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    ProductSearchBar(controller: searchController),
-                    const SizedBox(height: 10),
-                    const CategoryList(),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: productProvider.isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : productProvider.filteredProducts.isEmpty
-                          ? NotFound()
-                          : RefreshIndicator(
-                              onRefresh: () async {
-                                await context
-                                    .read<ProductProvider>()
-                                    .refreshProducts();
-                              },
-                              child: ProductGrid(controller: scrollController),
-                            ),
+                child: CustomScrollView(
+                  controller:
+                      scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          ProductSearchBar(controller: searchController),
+                          const SizedBox(height: 10),
+                          const CategoryList(),
+                          const SizedBox(height: 10),
+                        ],
+                      ),
                     ),
 
-                    if (productProvider.isLoadingMore)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 5),
-                        child: CircularProgressIndicator(),
+                    
+                    if (productProvider.isLoading)
+                      const SliverFillRemaining(
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (productProvider.filteredProducts.isEmpty)
+                      SliverFillRemaining(child: NotFound())
+                    else
+                     
+                      SliverPadding(
+                        padding: const EdgeInsets.all(0),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 20,
+                                crossAxisSpacing: 10,
+                                childAspectRatio: 0.66,
+                              ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final product =
+                                  productProvider.filteredProducts[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          ProductDetailScreen(product: product),
+                                    ),
+                                  );
+                                },
+                                child: ProductCard(product: product),
+                              );
+                            },
+                            childCount: productProvider.filteredProducts.length,
+                          ),
+                        ),
                       ),
-                    if (productProvider.error != null)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 5),
-                        child: CircularProgressIndicator(),
+
+                    SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          if (productProvider.isLoadingMore)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 15),
+                              child: CircularProgressIndicator(),
+                            )
+                          else if (productProvider.error != null )
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Try Again",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => context
+                                        .read<ProductProvider>()
+                                        .retryFetchingNextPage(),
+                                    child: const Text("Retry"),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
+                    ),
                   ],
                 ),
               ),

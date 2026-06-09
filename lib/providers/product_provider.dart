@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:test_1/api_response/api_response.dart';
 import 'package:test_1/models/product_model.dart';
@@ -12,7 +11,6 @@ class ProductProvider extends ChangeNotifier {
   List<Product> _allProducts = [];
 
   bool _isFetching = false;
-
   bool _isLoading = true;
   String? _error;
 
@@ -34,35 +32,30 @@ class ProductProvider extends ChangeNotifier {
 
   bool get isSearching => _isSearching;
   String get searchQuery => _searchQuery;
-
   String get selectedCategory => _selectedCategory;
-
   bool get isSearchEmpty => _searchQuery.isNotEmpty && filteredProducts.isEmpty;
 
   void bottomLoader() {
+    if (isLoadingMore || !hasMore || _isLoading) return;
     isLoadingMore = true;
+    _error = null;
     notifyListeners();
   }
 
-  // Future<void> fetchAllProducts() async {
-  //   ApiResponse<List<Product>> response;
-  //   response = await _service.getAllProducts();
-  //   if (response.success == true && response.data != null) {
-  //     _allProducts = response.data!;
-  //   }
-  // }
-
-  Future<void> fetchProducts() async {
-    if (isLoadingMore || !hasMore) return;
-
-    if (_error != null && _products.isEmpty) {
-      _isLoading = false;
-      notifyListeners();
-      return;
+  Future<void> fetchAllProducts() async {
+    ApiResponse<List<Product>> response;
+    response = await _service.getAllProducts();
+    if (response.success == true && response.data != null) {
+      _allProducts = response.data!;
     }
+  }
+  Future<void> fetchProducts() async {
+    if (isLoadingMore || !hasMore || _isLoading || _error != null) return;
 
     if (_products.isEmpty) {
       _isLoading = true;
+      _error = null;
+      notifyListeners();
     }
 
     try {
@@ -87,17 +80,27 @@ class ProductProvider extends ChangeNotifier {
           _products.addAll(newProducts);
           skip += limit;
         }
+        _error = null;
       } else {
-        // Show backend/network error
         _error = response.error ?? response.message;
       }
     } catch (e) {
-      e.toString();
+      _error = "လိုင်းမကောင်းပါ။ ကျေးဇူးပြု၍ ပြန်လည်ကြိုးစားပါ။";
     } finally {
       _isLoading = false;
       isLoadingMore = false;
       notifyListeners();
     }
+  }
+
+  void retryFetchingNextPage() {
+    _error = null;
+    isLoadingMore = true;
+    notifyListeners();
+
+    Timer(const Duration(milliseconds: 300), () {
+      refreshProducts();
+    });
   }
 
   List<Product> get filteredProducts {
@@ -120,12 +123,10 @@ class ProductProvider extends ChangeNotifier {
 
   void searchProducts(String query) {
     _searchQuery = query;
-
     _isSearching = true;
     notifyListeners();
 
     _searchTimer?.cancel();
-
     _searchTimer = Timer(const Duration(seconds: 1), () {
       _isSearching = false;
       notifyListeners();
@@ -143,36 +144,51 @@ class ProductProvider extends ChangeNotifier {
     _products.clear();
     skip = 0;
     hasMore = true;
+    _error = null; // reset error
 
     notifyListeners();
-
     await fetchProducts();
   }
 
   Future<void> refreshProducts() async {
     _products.clear();
-
     skip = 0;
     hasMore = true;
     isLoadingMore = false;
     _error = null;
-
     _isLoading = true;
     notifyListeners();
 
     try {
-      final response = await _service.getProducts(limit: limit, skip: skip);
+      ApiResponse<List<Product>> response;
 
-      if (response.success == true && response.data != null) {
-        _products = response.data!;
-        skip += limit;
+      if (_selectedCategory == 'all') {
+        response = await _service.getProducts(limit: limit, skip: skip);
       } else {
-        _error = response.message;
+        response = await _service.getProductsByCategory(
+          category: _selectedCategory,
+          limit: limit,
+          skip: skip,
+        );
+      }
+
+      if (response.success && response.data != null) {
+        final newProducts = response.data!;
+
+        if (newProducts.isEmpty) {
+          hasMore = false;
+        } else {
+          _products.addAll(newProducts);
+          skip += limit;
+        }
+      } else {
+        _error = response.error ?? response.message;
       }
     } catch (e) {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      isLoadingMore = false;
       notifyListeners();
     }
   }
@@ -183,12 +199,5 @@ class ProductProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<void> loadMoreProducts() async {
-    if (isLoadingMore || !hasMore) return;
-
-    isLoadingMore = true;
-    notifyListeners();
-
-    await fetchProducts();
-  }
+  
 }
