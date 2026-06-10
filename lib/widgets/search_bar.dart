@@ -20,10 +20,6 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
     super.initState();
 
     _productProvider = context.read<ProductProvider>();
-
-    widget.controller.addListener(() {
-      setState(() {}); // Refresh clear button visibility
-    });
   }
 
   @override

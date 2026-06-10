@@ -18,6 +18,7 @@ class ProductService {
       sendTimeout: const Duration(seconds: 5),
     ),
   );
+
   
   String _handleDioError(DioException e) {
     debugPrint("Dio Error Type: ${e.type}");

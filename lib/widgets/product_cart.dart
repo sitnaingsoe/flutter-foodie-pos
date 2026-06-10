@@ -35,14 +35,6 @@ class ProductCard extends StatelessWidget {
               height: 120,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) {
-                return Image.asset(
-                  'assets/images/default.png',
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                );
-              },
             ),
           ),
 
@@ -57,13 +49,9 @@ class ProductCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-
                 const SizedBox(height: 5),
-
                 Text("⭐ ${product.rating}"),
-
                 const SizedBox(height: 5),
-
                 Text(
                   "\$${product.price}",
                   style: const TextStyle(
@@ -123,7 +111,7 @@ class ProductCard extends StatelessWidget {
                               content: Text(
                                 isInCart
                                     ? "${product.title} Added in cart"
-                                    : "${product.title} removed from cart"
+                                    : "${product.title} removed from cart",
                               ),
                               duration: const Duration(seconds: 1),
                             ),

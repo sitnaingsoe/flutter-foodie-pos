@@ -7,10 +7,9 @@ import 'package:test_1/services/product_service.dart';
 class ProductProvider extends ChangeNotifier {
   final ProductService _service = ProductService();
 
-  List<Product> _products = [];
+  final List<Product> _products = [];
   List<Product> _allProducts = [];
 
-  bool _isFetching = false;
   bool _isLoading = true;
   String? _error;
 
@@ -36,7 +35,7 @@ class ProductProvider extends ChangeNotifier {
   bool get isSearchEmpty => _searchQuery.isNotEmpty && filteredProducts.isEmpty;
 
   void bottomLoader() {
-    if (isLoadingMore || !hasMore || _isLoading) return;
+    if (_error != null || isLoading) return;
     isLoadingMore = true;
     _error = null;
     notifyListeners();
@@ -49,8 +48,9 @@ class ProductProvider extends ChangeNotifier {
       _allProducts = response.data!;
     }
   }
+
   Future<void> fetchProducts() async {
-    if (isLoadingMore || !hasMore || _isLoading || _error != null) return;
+    if (!hasMore || _error != null) return;
 
     if (_products.isEmpty) {
       _isLoading = true;
@@ -82,25 +82,15 @@ class ProductProvider extends ChangeNotifier {
         }
         _error = null;
       } else {
-        _error = response.error ?? response.message;
+        _error = "No Internet Connection";
       }
     } catch (e) {
-      _error = "လိုင်းမကောင်းပါ။ ကျေးဇူးပြု၍ ပြန်လည်ကြိုးစားပါ။";
+      _error = "No Internet Connection";
     } finally {
       _isLoading = false;
       isLoadingMore = false;
       notifyListeners();
     }
-  }
-
-  void retryFetchingNextPage() {
-    _error = null;
-    isLoadingMore = true;
-    notifyListeners();
-
-    Timer(const Duration(milliseconds: 300), () {
-      refreshProducts();
-    });
   }
 
   List<Product> get filteredProducts {
@@ -148,6 +138,28 @@ class ProductProvider extends ChangeNotifier {
 
     notifyListeners();
     await fetchProducts();
+  }
+
+  Future<void> initialFetchProduct() async {
+    _isLoading = true;
+
+    final response = await _service.getProducts(limit: limit, skip: skip);
+    if (response.success && response.data != null) {
+      final initialProduct = response.data!;
+
+      if (initialProduct.isEmpty) {
+        hasMore = false;
+      } else {
+        _products.addAll(initialProduct);
+        skip += limit;
+      }
+      _error = null;
+    } else {
+      _error = 'No Internet Connection';
+    }
+
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<void> refreshProducts() async {
@@ -198,6 +210,4 @@ class ProductProvider extends ChangeNotifier {
     _searchTimer?.cancel();
     super.dispose();
   }
-
-  
 }
