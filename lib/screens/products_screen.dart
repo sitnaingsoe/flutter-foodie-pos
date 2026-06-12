@@ -38,20 +38,21 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   Future<void> _onRefresh() async {
     await Future.wait([
+       context.read<CategoryProvider>().fetchCategories(),
       context.read<ProductProvider>().refreshProducts(),
-      context.read<CategoryProvider>().fetchCategories(),
+     
     ]);
   }
 
   bool _onScrollNotification(ScrollNotification notification) {
     final provider = context.read<ProductProvider>();
 
-    if (provider.isLoading || provider.isLoadingMore || !provider.hasMore) {
+    if (provider.isLoading || provider.isLoadingMore || !provider.hasMore ) {
       return false;
     }
 
     if (notification.metrics.pixels >=
-        notification.metrics.maxScrollExtent - 50) {
+        notification.metrics.maxScrollExtent - 50 && provider.error == null) {
       provider.fetchProducts();
       provider.bottomLoader();
     }
@@ -69,10 +70,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final productProvider = context.watch<ProductProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
 
     final bool isInitialLoadError =
         productProvider.error != null &&
-        productProvider.filteredProducts.isEmpty;
+        productProvider.filteredProducts.isEmpty && categoryProvider.categories.isEmpty;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -86,7 +88,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         body: isInitialLoadError
             ? ErrorScreen(onRetry: _onRefresh)
             : RefreshIndicator(
-                onRefresh: _onRefresh,
+                onRefresh:_onRefresh,
                 child: NotificationListener<ScrollNotification>(
                   onNotification: _onScrollNotification,
                   child: CustomScrollView(

@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:test_1/api_response/api_response.dart';
 import 'package:test_1/models/product_model.dart';
 import 'package:test_1/services/product_service.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ProductProvider extends ChangeNotifier {
   final ProductService _service = ProductService();
 
   final List<Product> _products = [];
   List<Product> _allProducts = [];
+  StreamSubscription<List<ConnectivityResult>>? _connectionSubscription;
 
   bool _isLoading = true;
   String? _error;
@@ -19,10 +21,14 @@ class ProductProvider extends ChangeNotifier {
   bool _isSearching = false;
   Timer? _searchTimer;
 
-  int limit = 10;
+  int limit = 6;
   int skip = 0;
   bool hasMore = true;
   bool isLoadingMore = false;
+
+  bool _isConnected = true;
+
+  bool get isConnected => _isConnected;
 
   List<Product> get allProducts => _allProducts;
   List<Product> get products => _products;
@@ -35,9 +41,9 @@ class ProductProvider extends ChangeNotifier {
   bool get isSearchEmpty => _searchQuery.isNotEmpty && filteredProducts.isEmpty;
 
   void bottomLoader() {
-    if (_error != null || isLoading) return;
+    if (!_isConnected || isLoading || isLoadingMore) return;
+
     isLoadingMore = true;
-    _error = null;
     notifyListeners();
   }
 
@@ -50,7 +56,14 @@ class ProductProvider extends ChangeNotifier {
   }
 
   Future<void> fetchProducts() async {
-    if (!hasMore || _error != null) return;
+    if (!_isConnected) {
+      _error = "No Internet Connection";
+      notifyListeners();
+      return;
+    }
+    if (isLoadingMore || _isLoading || !hasMore) {
+      return;
+    }
 
     if (_products.isEmpty) {
       _isLoading = true;
@@ -163,6 +176,11 @@ class ProductProvider extends ChangeNotifier {
   }
 
   Future<void> refreshProducts() async {
+    if (!_isConnected) {
+      _error = "No Internet Connection";
+      notifyListeners();
+      return;
+    }
     _products.clear();
     skip = 0;
     hasMore = true;
@@ -205,9 +223,33 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
+  ProductProvider() {
+    _listenNetwork();
+  }
+
+  void _listenNetwork() {
+    _connectionSubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
+      _isConnected = !results.contains(ConnectivityResult.none);
+
+      if (_isConnected) {
+        _error = null;
+        if (_products.isEmpty) {
+          refreshProducts();
+        }
+        notifyListeners();
+      } else {
+        _error = "No Internet Connection";
+        notifyListeners();
+      }
+    });
+  }
+
   @override
   void dispose() {
     _searchTimer?.cancel();
+    _connectionSubscription?.cancel();
     super.dispose();
   }
 }
